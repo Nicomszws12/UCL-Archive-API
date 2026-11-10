@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UEFA Champions League | App Cliente Consumidora de la API</title>
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-card: #0b1528;
+      --bg-card-alt: #101f3c;
+      --border: #1e3a6d;
+      --cyan: #00d4ff;
+      --gold: #f59e0b;
+      --green: #10b981;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at top, #0d214f 0%, #030712 70%);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    header {
+      background: rgba(8, 16, 34, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 28px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .brand-logo {
+      width: 46px; height: 46px; border-radius: 12px;
+      background: linear-gradient(135deg, #1d4ed8, #00d4ff);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; box-shadow: 0 0 20px rgba(0,212,255,0.35);
+    }
+    .brand h1 { font-size: 1.2rem; color: #fff; }
+    .brand span { font-size: 0.8rem; color: var(--cyan); }
+    .nav-btns { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .btn {
+      padding: 8px 15px; border-radius: 8px; font-size: 0.84rem; font-weight: 600;
+      cursor: pointer; text-decoration: none; border: 1px solid var(--border);
+      background: var(--bg-card-alt); color: #fff; transition: all 0.15s;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn:hover { border-color: var(--cyan); transform: translateY(-1px); }
+    .btn-cyan { background: linear-gradient(135deg, #0284c7, #00d4ff); color: #020617; border: none; font-weight: 700; }
+    .btn-gold { background: linear-gradient(135deg, #d97706, #fbbf24); color: #020617; border: none; font-weight: 700; }
+    .container { max-width: 1380px; margin: 0 auto; padding: 24px; }
+
+    /* BANNER DEMOSTRACIÓN DE API Y API KEY */
+    .api-demo-banner {
+      background: linear-gradient(135deg, #091938 0%, #132a5c 100%);
+      border: 1px solid rgba(0, 212, 255, 0.45);
+      border-radius: 16px;
+      padding: 22px 26px;
+      margin-bottom: 26px;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.5);
+    }
+    .api-key-bar {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 14px; margin-top: 14px; padding: 12px 16px;
+      background: rgba(2, 6, 23, 0.8); border: 1px dashed var(--cyan); border-radius: 10px;
+    }
+    .api-key-code {
+      font-family: 'Courier New', monospace; font-size: 0.95rem; font-weight: 700;
+      color: var(--gold); letter-spacing: 0.5px; word-break: break-all;
+    }
+    .inspector-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px;
+    }
+    @media (max-width: 900px) { .inspector-grid { grid-template-columns: 1fr; } }
+    .code-box {
+      background: #020617; border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px 16px; overflow: hidden;
+    }
+    .code-box-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #1e293b;
+      flex-wrap: wrap; gap: 8px;
+    }
+    .code-box pre {
+      font-family: 'Courier New', monospace; font-size: 0.8rem; color: #38bdf8;
+      overflow-x: auto; max-height: 250px; white-space: pre-wrap;
+    }
+    .endpoint-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .ep-pill {
+      padding: 6px 12px; border-radius: 999px; font-size: 0.78rem; font-weight: 700;
+      background: rgba(0,212,255,0.12); color: var(--cyan); border: 1px solid rgba(0,212,255,0.3);
+      cursor: pointer;
+    }
+    .ep-pill.active, .ep-pill:hover { background: var(--cyan); color: #020617; }
+
+    /* SECCIONES VISUALES DE LA APP */
+    .section-title {
+      display: flex; align-items: center; justify-content: space-between;
+      margin: 28px 0 14px 0; border-bottom: 1px solid var(--border); padding-bottom: 8px;
+    }
+    .section-title h2 { font-size: 1.25rem; color: #fff; }
+    .section-title span { font-size: 0.8rem; color: var(--cyan); font-family: monospace; }
+
+    .matches-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 16px;
+    }
+    .match-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 18px; transition: border-color 0.2s;
+    }
+    .match-card:hover { border-color: var(--cyan); }
+    .match-meta {
+      display: flex; justify-content: space-between; font-size: 0.76rem; color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .match-teams {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      margin: 12px 0;
+    }
+    .team-col { display: flex; align-items: center; gap: 10px; flex: 1; }
+    .team-col.away { justify-content: flex-end; text-align: right; }
+    .team-crest { width: 40px; height: 40px; object-fit: contain; border-radius: 8px; background: #04091a; padding: 3px; }
+    .score-box {
+      background: #020617; border: 1px solid var(--cyan); border-radius: 8px;
+      padding: 6px 14px; font-size: 1.25rem; font-weight: 800; color: var(--gold);
+      min-width: 76px; text-align: center;
+    }
+    .match-events {
+      margin-top: 12px; padding-top: 10px; border-top: 1px dashed #1e293b;
+      font-size: 0.78rem; color: #cbd5e1;
+    }
+
+    .scorers-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px;
+    }
+    .scorer-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px; display: flex; align-items: center; gap: 12px;
+    }
+    .scorer-photo {
+      width: 52px; height: 52px; border-radius: 50%; object-fit: cover;
+      border: 2px solid var(--cyan); background: #04091a;
+    }
+    .scorer-goals {
+      margin-left: auto; background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.4);
+      color: var(--gold); font-weight: 800; padding: 5px 10px; border-radius: 8px; font-size: 0.9rem;
+    }
+
+    .clubs-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px;
+    }
+    .club-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px; text-align: center;
+    }
+    .club-card img { width: 56px; height: 56px; object-fit: contain; margin-bottom: 8px; }
+    .h2h-box {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 20px;
+    }
+    select {
+      background: #020617; color: #fff; border: 1px solid var(--border);
+      padding: 8px 12px; border-radius: 8px; font-size: 0.88rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-logo">🌍</div>
+      <div>
+        <h1>UEFA Champions League — App Cliente Consumidora</h1>
+        <span>Esta aplicación web externa consume en vivo los endpoints JSON de tu API REST (/api/v1)</span>
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button type="button" id="btn-reload-app" class="btn btn-cyan">🔄 Actualizar desde la API</button>
+      <a href="/admin" class="btn">🛡️ Ir al Panel SuperAdmin (/admin)</a>
+      <a href="/api-docs" target="_blank" class="btn">📖 Swagger UI (/api-docs)</a>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- 1. CONSOLA DEMOSTRATIVA PARA EL PROFESOR: API KEY + SNIPPET DE CÓDIGO + JSON CRUDO -->
+    <section class="api-demo-banner">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <div>
+          <span style="background:rgba(16,185,129,0.2);color:#34d399;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:700;">
+            🟢 CONEXIÓN REST API ACTIVA
+          </span>
+          <h2 style="margin-top:6px;font-size:1.3rem;">🔌 Consola de Integración y Consumo de la API (Demostración en Vivo)</h2>
+          <p style="font-size:0.86rem;color:#cbd5e1;">
+            Así es como cualquier aplicación externa (Web, Móvil, Python o React) se conecta a tu API mediante una <strong>API Key</strong> y recibe los datos que registraste en la base de datos:
+          </p>
+        </div>
+      </div>
+
+      <!-- API Key Generator -->
+      <div class="api-key-bar">
+        <div>
+          <span style="font-size:0.78rem;color:var(--muted);display:block;">🔑 Tu Código / API Key de Acceso para Aplicaciones Externas (Header <code>x-api-key</code>):</span>
+          <span id="display-api-key" class="api-key-code">ucl_live_api_9f8a7b6c5d4e3f2a1b0c_2026</span>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button type="button" id="btn-new-apikey" class="btn btn-gold">⚡ Generar Nuevo Código de API</button>
+          <button type="button" id="btn-copy-apikey" class="btn">📋 Copiar API Key</button>
+        </div>
+      </div>
+
+      <!-- Selector de Endpoint para probar en vivo -->
+      <div class="endpoint-pills" id="endpoint-pills">
+        <button type="button" class="ep-pill active" data-ep="/api/v1/clubs">🏟️ GET /api/v1/clubs</button>
+        <button type="button" class="ep-pill" data-ep="/api/v1/players/top-scorers">🔥 GET /api/v1/players/top-scorers</button>
+        <button type="button" class="ep-pill" data-ep="/api/v1/matches">⚽ GET /api/v1/matches</button>
+        <button type="button" class="ep-pill" data-ep="/api/v1/seasons">🏆 GET /api/v1/seasons</button>
+        <button type="button" class="ep-pill" data-ep="/api/v1/squads">👕 GET /api/v1/squads</button>
+      </div>
+
+      <div class="inspector-grid">
+        <!-- Columna Izquierda: Código para implementar en una App -->
+        <div class="code-box">
+          <div class="code-box-header">
+            <strong style="font-size:0.82rem;color:#fff;">💻 Código para implementar esta API en una App:</strong>
+            <div style="display:flex;gap:6px;">
+              <button type="button" class="btn lang-btn" data-lang="js" style="padding:3px 8px;font-size:0.74rem;">JavaScript (fetch)</button>
+              <button type="button" class="btn lang-btn" data-lang="py" style="padding:3px 8px;font-size:0.74rem;">Python</button>
+              <button type="button" class="btn lang-btn" data-lang="curl" style="padding:3px 8px;font-size:0.74rem;">cURL</button>
+            </div>
+          </div>
+          <pre id="code-snippet-view"></pre>
+        </div>
+
+        <!-- Columna Derecha: Respuesta JSON Cruda en Tiempo Real -->
+        <div class="code-box">
+          <div class="code-box-header">
+            <strong style="font-size:0.82rem;color:#fff;">📡 Respuesta JSON en Tiempo Real de tu Servidor:</strong>
+            <span id="json-status-badge" style="font-size:0.75rem;color:#34d399;font-family:monospace;">HTTP 200 OK</span>
+          </div>
+          <pre id="live-json-view" style="color:#a7f3d0;">Cargando respuesta JSON de la API...</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. PARTIDOS Y RESULTADOS CONSUMIDOS DE LA API -->
+    <div class="section-title">
+      <h2>⚽ Cartelera de Partidos y Resultados en Vivo</h2>
+      <span>Fuente: GET /api/v1/matches</span>
+    </div>
+    <div id="app-matches-list" class="matches-grid"></div>
+
+    <!-- 3. RANKING DE GOLEADORES CONSUMIDO DE LA API -->
+    <div class="section-title">
+      <h2>🔥 Ranking Oficial de Goleadores</h2>
+      <span>Fuente: GET /api/v1/players/top-scorers</span>
+    </div>
+    <div id="app-scorers-list" class="scorers-grid"></div>
+
+    <!-- 4. COMPARADOR HEAD-TO-HEAD CONSUMIDO DE LA API -->
+    <div class="section-title">
+      <h2>⚔️ Historial Cara a Cara (Head-to-Head)</h2>
+      <span>Fuente: GET /api/v1/head-to-head?team1=X&amp;team2=Y</span>
+    </div>
+    <div class="h2h-box">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
+        <select id="h2h-club1"></select>
+        <strong style="color:var(--gold);">VS</strong>
+        <select id="h2h-club2"></select>
+        <button type="button" id="btn-run-h2h" class="btn btn-cyan">⚔️ Consultar Historial en la API</button>
+      </div>
+      <div id="h2h-result" style="margin-top:16px;font-size:0.9rem;color:#cbd5e1;"></div>
+    </div>
+
+    <!-- 5. CLUBES REGISTRADOS EN LA API -->
+    <div class="section-title">
+      <h2>🏟️ Clubes Oficiales UEFA</h2>
+      <span>Fuente: GET /api/v1/clubs</span>
+    </div>
+    <div id="app-clubs-list" class="clubs-grid"></div>
+
+  </div>
+
+  <script>
+    const DEFAULT_CREST = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%230d1b36'/><text y='43' x='14' font-size='34'>🛡️</text></svg>";
+    const DEFAULT_PHOTO = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='32' fill='%230d1b36'/><text y='43' x='15' font-size='32'>🏃</text></svg>";
+
+    let currentEndpoint = '/api/v1/clubs';
+    let currentLang = 'js';
+    let currentApiKey = localStorage.getItem('ucl_demo_api_key') || 'ucl_live_api_9f8a7b6c5d4e3f2a1b0c_2026';
+    document.getElementById('display-api-key').textContent = currentApiKey;
+
+    function updateCodeSnippet() {
+      const baseUrl = window.location.origin;
+      const fullUrl = `${baseUrl}${currentEndpoint}`;
+      const view = document.getElementById('code-snippet-view');
+
+      if (currentLang === 'js') {
+        view.textContent = `// Consumir tu API desde JavaScript / React / App Móvil:
+const response = await fetch("${fullUrl}", {
+  method: "GET",
+  headers: {
+    "Accept": "application/json",
+    "x-api-key": "${currentApiKey}"
+  }
+});
+const datos = await response.json();
+console.log("Datos recibidos de la API:", datos);`;
+      } else if (currentLang === 'py') {
+        view.textContent = `# Consumir tu API desde Python (requests):
+import requests
+
+url = "${fullUrl}"
+headers = {
+    "Accept": "application/json",
+    "x-api-key": "${currentApiKey}"
+}
+response = requests.get(url, headers=headers)
+print(response.json())`;
+      } else {
+        view.textContent = `# Probar desde terminal con cURL:
+curl -X GET "${fullUrl}" \\
+  -H "Accept: application/json" \\
+  -H "x-api-key: ${currentApiKey}"`;
+      }
+    }
+
+    async function inspectEndpoint(ep) {
+      currentEndpoint = ep;
+      updateCodeSnippet();
+      const jsonView = document.getElementById('live-json-view');
+      const badge = document.getElementById('json-status-badge');
+      const t0 = performance.now();
+      try {
+        const res = await fetch(ep, { headers: { 'x-api-key': currentApiKey } });
+        const data = await res.json();
+        const ms = Math.round(performance.now() - t0);
+        badge.textContent = `HTTP ${res.status} OK • ⚡ ${ms} ms`;
+        jsonView.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        jsonView.textContent = 'Error consultando el endpoint: ' + err.message;
+      }
+    }
+
+    async function loadConsumerApp() {
+      await inspectEndpoint(currentEndpoint);
+
+      const [clubsRes, scorersRes, matchesRes] = await Promise.all([
+        fetch('/api/v1/clubs').then(r => r.json()),
+        fetch('/api/v1/players/top-scorers?limit=20').then(r => r.json()),
+        fetch('/api/v1/matches?limit=30').then(r => r.json())
+      ]);
+
+      const clubs = clubsRes.data || [];
+      const scorers = scorersRes.data || [];
+      const matches = matchesRes.data || [];
+
+      // 1. Renderizar Partidos
+      const matchesEl = document.getElementById('app-matches-list');
+      if (matches.length === 0) {
+        matchesEl.innerHTML = `<div class="match-card">Aún no hay partidos registrados. Entra a <b>/admin</b>, registra un partido y aparecerá aquí automáticamente consumido desde <code>GET /api/v1/matches</code>.</div>`;
+      } else {
+        matchesEl.innerHTML = matches.map(m => {
+          const evs = (m.events || []).map(e => `<span>• ${e.minute}${e.extra_minute ? '+'+e.extra_minute : ''}' ${e.type} (${e.player ? e.player.first_name + ' ' + e.player.last_name : ''})</span>`).join(' ');
+          return `
+            <div class="match-card">
+              <div class="match-meta">
+                <span>🏆 ${m.season ? m.season.year_start + '/' + m.season.year_end : ''} • ${m.phase ? m.phase.name : ''}</span>
+                <span>🏟️ ${m.stadium || ''}</span>
+              </div>
+              <div class="match-teams">
+                <div class="team-col">
+                  <img class="team-crest" src="${m.home_team?.crest_url || DEFAULT_CREST}" onerror="this.src='${DEFAULT_CREST}'" />
+                  <strong>${m.home_team?.name || ''}</strong>
+                </div>
+                <div class="score-box">${m.home_score} - ${m.away_score}</div>
+                <div class="team-col away">
+                  <strong>${m.away_team?.name || ''}</strong>
+                  <img class="team-crest" src="${m.away_team?.crest_url || DEFAULT_CREST}" onerror="this.src='${DEFAULT_CREST}'" />
+                </div>
+              </div>
+              ${evs ? `<div class="match-events">${evs}</div>` : ''}
+            </div>
+          `;
+        }).join('');
+      }
+
+      // 2. Renderizar Goleadores
+      const scorersEl = document.getElementById('app-scorers-list');
+      if (scorers.length === 0) {
+        scorersEl.innerHTML = `<div class="scorer-card">Registra jugadores en <b>/admin</b> para verlos aquí vía <code>GET /api/v1/players/top-scorers</code>.</div>`;
+      } else {
+        scorersEl.innerHTML = scorers.map((p, idx) => `
+          <div class="scorer-card">
+            <img class="scorer-photo" src="${p.photo_url || DEFAULT_PHOTO}" onerror="this.src='${DEFAULT_PHOTO}'" />
+            <div>
+              <strong>#${idx + 1} ${p.first_name} ${p.last_name}</strong>
+              <div style="font-size:0.76rem;color:var(--muted);">${p.nationality} • ${p.position}</div>
+            </div>
+            <div class="scorer-goals">⚽ ${p.total_goals}</div>
+          </div>
+        `).join('');
+      }
+
+      // 3. Renderizar Clubes y Selectores Head-to-Head
+      const clubsEl = document.getElementById('app-clubs-list');
+      if (clubs.length === 0) {
+        clubsEl.innerHTML = `<div class="club-card">Registra clubes en <b>/admin</b> para consumirlos vía <code>GET /api/v1/clubs</code>.</div>`;
+      } else {
+        clubsEl.innerHTML = clubs.map(c => `
+          <div class="club-card">
+            <img src="${c.crest_url || DEFAULT_CREST}" onerror="this.src='${DEFAULT_CREST}'" />
+            <h4>${c.name}</h4>
+            <div style="font-size:0.78rem;color:var(--muted);">${c.short_name} • ${c.country_code} • 🏟️ ${c.stadium}</div>
+            <div style="margin-top:6px;color:var(--gold);font-weight:700;font-size:0.84rem;">🏆 ${c.titles_count} Títulos</div>
+          </div>
+        `).join('');
+
+        const opts = clubs.map(c => `<option value="${c.id}">${c.name} (${c.short_name})</option>`).join('');
+        const s1 = document.getElementById('h2h-club1');
+        const s2 = document.getElementById('h2h-club2');
+        s1.innerHTML = opts;
+        s2.innerHTML = opts;
+        if (clubs.length > 1) s2.selectedIndex = 1;
+      }
+    }
+
+    document.querySelectorAll('.ep-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.ep-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        inspectEndpoint(btn.getAttribute('data-ep'));
+      });
+    });
+
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentLang = btn.getAttribute('data-lang');
+        updateCodeSnippet();
+      });
+    });
+
+    document.getElementById('btn-new-apikey').addEventListener('click', () => {
+      const randomHex = Array.from({ length: 20 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+      currentApiKey = `ucl_live_api_${randomHex}_2026`;
+      localStorage.setItem('ucl_demo_api_key', currentApiKey);
+      document.getElementById('display-api-key').textContent = currentApiKey;
+      updateCodeSnippet();
+    });
+
+    document.getElementById('btn-copy-apikey').addEventListener('click', async () => {
+      await navigator.clipboard.writeText(currentApiKey);
+      alert('API Key copiada: ' + currentApiKey);
+    });
+
+    document.getElementById('btn-run-h2h').addEventListener('click', async () => {
+      const t1 = document.getElementById('h2h-club1').value;
+      const t2 = document.getElementById('h2h-club2').value;
+      const out = document.getElementById('h2h-result');
+      if (!t1 || !t2 || t1 === t2) {
+        out.innerHTML = '<span style="color:#f87171;">Selecciona dos clubes diferentes para comparar su historial.</span>';
+        return;
+      }
+      const url = `/api/v1/head-to-head?team1=${t1}&team2=${t2}`;
+      await inspectEndpoint(url);
+      const res = await fetch(url).then(r => r.json());
+      if (res.error) {
+        out.textContent = res.error;
+        return;
+      }
+      out.innerHTML = `<strong>${res.matchup}</strong> — Partidos jugados: <b>${res.summary.total_matches}</b> | Empates: <b>${res.summary.draws}</b> (Mira el JSON completo arriba en el inspector).`;
+    });
+
+    document.getElementById('btn-reload-app').addEventListener('click', loadConsumerApp);
+
+    loadConsumerApp();
+  </script>
+</body>
+</html>

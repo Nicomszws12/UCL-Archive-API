@@ -29,6 +29,10 @@ app.get('/admin', (_req: Request, res: Response) => {
   res.sendFile(path.join(publicDir, 'admin', 'index.html'));
 });
 
+app.get('/app', (_req: Request, res: Response) => {
+  res.sendFile(path.join(publicDir, 'app', 'index.html'));
+});
+
 // 2. Límite de peticiones (Rate Limiting) global para proteger la API
 app.use('/api', apiLimiter);
 
