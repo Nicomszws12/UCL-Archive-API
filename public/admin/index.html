@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UEFA Champions League v2.0 | SuperAdmin Dashboard</title>
+  <link rel="stylesheet" href="/admin/styles.css" />
+</head>
+<body>
+
+  <!-- ==================== PANTALLA DE ACCESO EXCLUSIVA SUPERADMIN (2FA) ==================== -->
+  <div id="auth-overlay" class="auth-overlay">
+    <div class="auth-container auth-container-secure">
+      <div class="auth-header">
+        <div class="ucl-starball">🏆⚽</div>
+        <h1>UEFA CHAMPIONS LEAGUE ARCHIVE v2.0</h1>
+        <p>Panel Oficial de Carga de Datos — Acceso Exclusivo SuperAdmin</p>
+      </div>
+
+      <div class="auth-body-secure">
+
+        <!-- PASO 1: CREDENCIALES MAESTRAS (CORREO + CONTRASEÑA CON OJITO) -->
+        <div id="auth-step-1" class="auth-step">
+          <div class="auth-step-badge">
+            <span class="badge-gold">🔐 Paso 1 • Credenciales Maestras</span>
+          </div>
+          <h3>Iniciar Sesión como SuperAdmin</h3>
+          <p class="desc">
+            Ingresa tu correo personal y tu contraseña de SuperAdmin. Al validar tus credenciales se te enviará un código de verificación de 6 dígitos:
+          </p>
+
+          <form id="form-step1-creds" autocomplete="off">
+            <div class="form-group">
+              <label for="login-email">Correo Electrónico Personal <span class="req">*</span></label>
+              <input
+                type="email"
+                id="login-email"
+                placeholder="Ingresa tu correo personal"
+                autocomplete="off"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="login-password">Contraseña Maestra <span class="req">*</span></label>
+              <div class="password-input-group">
+                <input
+                  type="password"
+                  id="login-password"
+                  placeholder="Ingresa tu contraseña"
+                  autocomplete="off"
+                  required
+                />
+                <button
+                  type="button"
+                  id="btn-toggle-password"
+                  class="btn-eye-toggle"
+                  title="Mostrar u ocultar contraseña"
+                  aria-label="Mostrar u ocultar contraseña"
+                >
+                  👁️
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" id="btn-submit-step1" class="btn btn-gold btn-full btn-lg">
+              📨 Enviar Código de Seguridad a mi Correo
+            </button>
+          </form>
+        </div>
+
+        <!-- PASO 2: CÓDIGO OTP DE 6 DÍGITOS (OCULTO INICIALMENTE) -->
+        <div id="auth-step-2" class="auth-step hidden">
+          <div class="auth-step-badge">
+            <span class="badge-cyan">🛡️ Paso 2 • Verificación Doble Factor (2FA)</span>
+          </div>
+          <h3>Ingresa tu Código de Seguridad</h3>
+          <p class="desc">
+            Se ha generado un código de 6 dígitos para <strong id="step2-email-display" class="highlight-cyan"></strong>.<br />
+            Revisa tu bandeja de entrada o la terminal del servidor.
+          </p>
+
+          <form id="form-step2-otp" autocomplete="off">
+            <div class="form-group">
+              <label for="login-otp">Código de Seguridad (6 dígitos) <span class="req">*</span></label>
+              <div class="otp-input-container">
+                <input
+                  type="text"
+                  id="login-otp"
+                  maxlength="6"
+                  pattern="[0-9]{6}"
+                  placeholder="000000"
+                  autocomplete="off"
+                  required
+                />
+              </div>
+              <small class="form-hint">⏱️ Válido durante 10 minutos. Es de un solo uso.</small>
+            </div>
+
+            <button type="submit" id="btn-submit-step2" class="btn btn-primary btn-full btn-lg">
+              🚀 Validar Código y Entrar como SuperAdmin
+            </button>
+
+            <div class="step-footer-actions">
+              <button type="button" id="btn-back-to-step1" class="btn-link">
+                ← Volver a ingresar correo y contraseña
+              </button>
+              <button type="button" id="btn-resend-otp" class="btn-link">
+                🔄 Reenviar código
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- SECCIÓN SECUNDARIA COLAPSABLE: ACCESO PARA COLABORADORES CON TOKEN -->
+        <div class="auth-collaborator-toggle">
+          <button type="button" id="btn-toggle-collab-section" class="btn-link-subtle">
+            🔑 ¿Tienes un Token de Colaborador / Editor? Ingresar aquí ▼
+          </button>
+        </div>
+
+        <div id="collab-token-container" class="collab-token-container hidden">
+          <div class="collab-token-box">
+            <span class="auth-box-badge badge-cyan">Acceso Colaborador / Editor</span>
+            <h4>Validar Token JWT</h4>
+            <p class="desc-sm">
+              Si recibiste un token para carga de datos (Thunder Client o colaborador autorizado), pégalo aquí.
+              <em>Nota: Tendrás permisos para registrar y editar datos, pero la opción de vaciar la base de datos estará bloqueada.</em>
+            </p>
+            <form id="form-token-auth" autocomplete="off">
+              <div class="form-group">
+                <textarea
+                  id="jwt-token-input"
+                  rows="3"
+                  placeholder="Pega aquí tu token eyJhbGciOi..."
+                  required
+                ></textarea>
+              </div>
+              <button type="submit" class="btn btn-outline btn-full">
+                🔑 Validar Token y Entrar
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== CABECERA DEL PANEL DESBLOQUEADO ==================== -->
+  <header class="top-navbar">
+    <div class="brand-area">
+      <div class="brand-icon">🏆</div>
+      <div class="brand-title">
+        <h2>UCL Archive v2.0 — SuperAdmin Dashboard</h2>
+        <span>Escudos • Fotos • Plantillas por Rol • Partidos, Suspensiones e Incidencias Unificadas</span>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <span id="active-user-badge" class="role-pill">🔒 SUPERADMIN ACTIVO</span>
+      <a href="/api-docs" target="_blank" class="btn btn-outline">📖 Swagger UI</a>
+      <button type="button" id="btn-refresh-all" class="btn btn-outline">🔄 Sincronizar</button>
+      <button type="button" id="btn-reset-db" class="btn btn-danger-outline">🗑️ Vaciar Base de Datos</button>
+      <button type="button" id="btn-logout" class="btn btn-outline">🚪 Salir</button>
+    </div>
+  </header>
+
+  <!-- ==================== INDICADORES EN VIVO (KPIs) ==================== -->
+  <section class="kpi-strip">
+    <div class="kpi-card">
+      <div class="kpi-info">
+        <span>Clubes Registrados</span>
+        <strong id="kpi-clubs">0</strong>
+      </div>
+      <div class="kpi-icon">🏟️</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-info">
+        <span>Jugadores Históricos</span>
+        <strong id="kpi-players">0</strong>
+      </div>
+      <div class="kpi-icon">🏃</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-info">
+        <span>Temporadas Oficiales</span>
+        <strong id="kpi-seasons">0</strong>
+      </div>
+      <div class="kpi-icon">🏆</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-info">
+        <span>Partidos Registrados</span>
+        <strong id="kpi-matches">0</strong>
+      </div>
+      <div class="kpi-icon">⚽</div>
+    </div>
+  </section>
+
+  <!-- ==================== PESTAÑAS DE NAVEGACIÓN (5 CENTROS UNIFICADOS) ==================== -->
+  <div class="tabs-wrapper">
+    <nav class="tabs-nav" id="tabs-nav">
+      <button type="button" class="tab-btn active" data-tab="tab-clubs">🏟️ 1. Clubes y Escudos</button>
+      <button type="button" class="tab-btn" data-tab="tab-players">🏃 2. Jugadores y Goleadores</button>
+      <button type="button" class="tab-btn" data-tab="tab-seasons">🏆 3. Temporadas</button>
+      <button type="button" class="tab-btn" data-tab="tab-squads">👕 4. Plantillas (Squads)</button>
+      <button type="button" class="tab-btn" data-tab="tab-matches">⚽ 5. Partidos, Resultados e Incidencias</button>
+    </nav>
+  </div>
+
+  <!-- ==================== CONTENEDOR PRINCIPAL DE PESTAÑAS ==================== -->
+  <main class="main-container">
+
+    <!-- ==================== PESTAÑA 1: CLUBES Y ESCUDOS ==================== -->
+    <section id="tab-clubs" class="tab-panel active">
+      <div class="panel-grid">
+        <div>
+          <!-- Crear Club -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>🏟️ Registrar Nuevo Club UEFA</h3>
+                <p>Sube el escudo desde tu PC o pega un enlace URL de imagen.</p>
+              </div>
+            </div>
+            <form id="form-create-club">
+              <div class="form-group">
+                <label for="club-name">Nombre Oficial del Club <span class="req">*</span></label>
+                <input type="text" id="club-name" placeholder="Ej: Real Madrid CF, AC Milan, Liverpool FC" required />
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="club-short">Abreviatura (3-5 letras) <span class="req">*</span></label>
+                  <input type="text" id="club-short" maxlength="5" placeholder="Ej: RMA, ACM, LIV" required />
+                </div>
+                <div class="form-group">
+                  <label for="club-titles">Títulos Champions 🏆</label>
+                  <input type="number" id="club-titles" min="0" max="50" value="0" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="club-country">País Federación UEFA <span class="req">*</span></label>
+                <input type="text" class="uefa-country-filter select-filter-input" data-target="club-country" placeholder="🔍 Buscar país o región de la UEFA..." />
+                <select id="club-country" required></select>
+              </div>
+              <div class="form-group">
+                <label for="club-stadium">Estadio Oficial <span class="req">*</span></label>
+                <input type="text" id="club-stadium" placeholder="Ej: Santiago Bernabéu" required />
+              </div>
+
+              <!-- Subida / URL de Escudo -->
+              <div class="image-uploader-box">
+                <label>🛡️ Escudo del Club (Subir archivo local o pegar URL)</label>
+                <div class="form-group" style="margin-top:6px;">
+                  <input type="file" id="club-crest-file" accept="image/*" />
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <input type="text" id="club-crest-url" placeholder="O pega aquí la URL del escudo (https://... o /uploads/...)" />
+                </div>
+                <div class="image-preview-row">
+                  <img id="club-crest-preview" class="thumb-crest" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='42' x='14' font-size='34'>🛡️</text></svg>" alt="Vista previa escudo" />
+                  <small style="color:#94a3b8;">Vista previa en vivo del escudo antes de guardar.</small>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-full">💾 Guardar Club</button>
+            </form>
+          </div>
+
+          <!-- Editar Club Existente -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>✏️ Editar Escudo o Datos de Club</h3>
+                <p>Selecciona un club registrado para actualizar su escudo, estadio o títulos.</p>
+              </div>
+            </div>
+            <form id="form-update-club">
+              <div class="form-group">
+                <label for="edit-club-select">Seleccionar Club <span class="req">*</span></label>
+                <input type="text" class="select-filter-input" data-target="edit-club-select" placeholder="🔍 Buscar club..." />
+                <select id="edit-club-select" required></select>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="edit-club-stadium">Estadio</label>
+                  <input type="text" id="edit-club-stadium" required />
+                </div>
+                <div class="form-group">
+                  <label for="edit-club-titles">Títulos 🏆</label>
+                  <input type="number" id="edit-club-titles" min="0" required />
+                </div>
+              </div>
+              <div class="image-uploader-box">
+                <label>🛡️ Actualizar Escudo (Archivo o URL)</label>
+                <div class="form-group" style="margin-top:6px;">
+                  <input type="file" id="edit-club-crest-file" accept="image/*" />
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <input type="text" id="edit-club-crest-url" placeholder="URL del escudo" />
+                </div>
+                <div class="image-preview-row">
+                  <img id="edit-club-crest-preview" class="thumb-crest" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='42' x='14' font-size='34'>🛡️</text></svg>" alt="Preview" />
+                  <small style="color:#94a3b8;">Escudo actual / nuevo del club.</small>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-gold btn-full">🔄 Actualizar Club</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-toolbar">
+            <div>
+              <h3>📋 Clubes en la Base de Datos</h3>
+            </div>
+            <input type="text" id="search-clubs-table" class="table-search" placeholder="🔍 Filtrar club, siglas o país..." />
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Escudo / Club</th>
+                  <th>Siglas</th>
+                  <th>País UEFA</th>
+                  <th>Estadio</th>
+                  <th>Títulos 🏆</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-clubs"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PESTAÑA 2: JUGADORES Y GOLEADORES ==================== -->
+    <section id="tab-players" class="tab-panel">
+      <div class="panel-grid">
+        <div>
+          <!-- Crear Jugador -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>🏃 Registrar Nuevo Jugador</h3>
+                <p>Sube la foto del jugador desde tu PC o pega un enlace URL.</p>
+              </div>
+            </div>
+            <form id="form-create-player">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="player-first-name">Nombre <span class="req">*</span></label>
+                  <input type="text" id="player-first-name" placeholder="Ej: Cristiano" required />
+                </div>
+                <div class="form-group">
+                  <label for="player-last-name">Apellido <span class="req">*</span></label>
+                  <input type="text" id="player-last-name" placeholder="Ej: Ronaldo" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="player-nationality">País / Federación UEFA <span class="req">*</span></label>
+                <input type="text" class="uefa-country-filter select-filter-input" data-target="player-nationality" placeholder="🔍 Buscar país o región de la UEFA..." />
+                <select id="player-nationality" required></select>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="player-position">Posición <span class="req">*</span></label>
+                  <select id="player-position" required>
+                    <option value="Forward">Forward (Delantero)</option>
+                    <option value="Midfielder">Midfielder (Mediocampista)</option>
+                    <option value="Defender">Defender (Defensa)</option>
+                    <option value="Goalkeeper">Goalkeeper (Portero)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="player-active">Estado Profesional</label>
+                  <select id="player-active">
+                    <option value="true">🟢 En Activo</option>
+                    <option value="false">⚪ Retirado / Leyenda</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="player-goals">Goles Totales UCL</label>
+                  <input type="number" id="player-goals" min="0" value="0" required />
+                </div>
+                <div class="form-group">
+                  <label for="player-apps">Partidos Jugados UCL</label>
+                  <input type="number" id="player-apps" min="0" value="0" required />
+                </div>
+              </div>
+
+              <!-- Subida / URL de Foto -->
+              <div class="image-uploader-box">
+                <label>📸 Foto del Jugador (Subir archivo local o pegar URL)</label>
+                <div class="form-group" style="margin-top:6px;">
+                  <input type="file" id="player-photo-file" accept="image/*" />
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <input type="text" id="player-photo-url" placeholder="O pega aquí la URL de la foto (https://... o /uploads/...)" />
+                </div>
+                <div class="image-preview-row">
+                  <img id="player-photo-preview" class="thumb-circle" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='42' x='14' font-size='34'>🏃</text></svg>" alt="Vista previa foto" />
+                  <small style="color:#94a3b8;">Vista previa circular de la foto del jugador.</small>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-full">💾 Registrar Jugador</button>
+            </form>
+          </div>
+
+          <!-- Editar Jugador Existente -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>✏️ Actualizar Foto o Estadísticas de Jugador</h3>
+                <p>Selecciona un jugador para modificar su foto, goles, partidos o estado.</p>
+              </div>
+            </div>
+            <form id="form-update-player">
+              <div class="form-group">
+                <label for="edit-player-select">Seleccionar Jugador <span class="req">*</span></label>
+                <input type="text" class="select-filter-input" data-target="edit-player-select" placeholder="🔍 Escribe para buscar jugador..." />
+                <select id="edit-player-select" required></select>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="edit-player-goals">Goles Totales</label>
+                  <input type="number" id="edit-player-goals" min="0" required />
+                </div>
+                <div class="form-group">
+                  <label for="edit-player-apps">Partidos Totales</label>
+                  <input type="number" id="edit-player-apps" min="0" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="edit-player-active">Estado</label>
+                <select id="edit-player-active">
+                  <option value="true">🟢 En Activo</option>
+                  <option value="false">⚪ Retirado / Leyenda</option>
+                </select>
+              </div>
+              <div class="image-uploader-box">
+                <label>📸 Actualizar Foto del Jugador (Archivo o URL)</label>
+                <div class="form-group" style="margin-top:6px;">
+                  <input type="file" id="edit-player-photo-file" accept="image/*" />
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <input type="text" id="edit-player-photo-url" placeholder="URL de la foto del jugador" />
+                </div>
+                <div class="image-preview-row">
+                  <img id="edit-player-photo-preview" class="thumb-circle" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='42' x='14' font-size='34'>🏃</text></svg>" alt="Preview" />
+                  <small style="color:#94a3b8;">Foto circular actual / nueva.</small>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-gold btn-full">🔄 Actualizar Jugador</button>
+            </form>
+          </div>
+        </div>
+
+        <div>
+          <!-- Ranking en Vivo de Goleadores conectado a GET /api/v1/players/top-scorers -->
+          <div class="card">
+            <div class="table-toolbar">
+              <div>
+                <h3>🥇 Ranking Histórico de Goleadores (<code>/api/v1/players/top-scorers</code>)</h3>
+                <p style="font-size:0.8rem;color:#94a3b8;">Muestra la foto circular oficial, nacionalidad, goles y promedio.</p>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <select id="filter-top-scorers-active" style="width:auto;padding:7px 10px;">
+                  <option value="">Todos (Histórico)</option>
+                  <option value="true">🟢 Solo en Activo</option>
+                </select>
+                <input type="text" id="search-players-table" class="table-search" placeholder="🔍 Filtrar jugador o país..." />
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Foto / Jugador</th>
+                    <th>País UEFA</th>
+                    <th>Posición</th>
+                    <th>Goles ⚽</th>
+                    <th>Partidos</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-players"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PESTAÑA 3: TEMPORADAS ==================== -->
+    <section id="tab-seasons" class="tab-panel">
+      <div class="panel-grid">
+        <div>
+          <!-- Crear Temporada con Lógica Inteligente -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>🏆 Crear Nueva Temporada</h3>
+                <p>Auto-calcula formato, cupos de equipos y genera sus fases oficiales en transacción.</p>
+              </div>
+            </div>
+            <form id="form-create-season">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="season-year-start">Año de Inicio <span class="req">*</span></label>
+                  <input type="number" id="season-year-start" min="1955" max="2050" value="2024" required />
+                </div>
+                <div class="form-group">
+                  <label for="season-year-end">Año de Fin (Automático)</label>
+                  <input type="number" id="season-year-end" value="2025" readonly />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="season-format">Formato del Torneo</label>
+                  <select id="season-format">
+                    <option value="SWISS_LEAGUE">SWISS_LEAGUE (Sistema Suizo 2024/25+)</option>
+                    <option value="CLASSIC_GROUPS">CLASSIC_GROUPS (Grupos Clásicos 1992-2024)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="season-teams-count">Clubes Participantes</label>
+                  <input type="number" id="season-teams-count" value="36" required />
+                </div>
+              </div>
+
+              <div id="season-phases-preview" class="helper-box">
+                ⚡ <strong>Automatización Prisma:</strong> Se crearán automáticamente las fases correspondientes al formato.
+              </div>
+
+              <div class="form-group">
+                <label for="season-champion">Club Campeón (Opcional)</label>
+                <select id="season-champion"></select>
+              </div>
+              <div class="form-group">
+                <label for="season-runner-up">Club Subcampeón (Opcional)</label>
+                <select id="season-runner-up"></select>
+              </div>
+              <div class="form-group">
+                <label for="season-top-scorer">Máximo Goleador (Opcional)</label>
+                <select id="season-top-scorer"></select>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-full">💾 Crear Temporada + Fases</button>
+            </form>
+          </div>
+
+          <!-- Actualizar Cuadro de Honor -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>👑 Asignar / Editar Campeón y Goleador</h3>
+                <p>Actualiza el cuadro de honor de cualquier temporada existente.</p>
+              </div>
+            </div>
+            <form id="form-update-season">
+              <div class="form-group">
+                <label for="edit-season-select">Seleccionar Temporada <span class="req">*</span></label>
+                <select id="edit-season-select" required></select>
+              </div>
+              <div class="form-group">
+                <label for="edit-season-champion">Club Campeón</label>
+                <select id="edit-season-champion"></select>
+              </div>
+              <div class="form-group">
+                <label for="edit-season-runner-up">Club Subcampeón</label>
+                <select id="edit-season-runner-up"></select>
+              </div>
+              <div class="form-group">
+                <label for="edit-season-top-scorer">Máximo Goleador</label>
+                <select id="edit-season-top-scorer"></select>
+              </div>
+              <button type="submit" class="btn btn-gold btn-full">🔄 Guardar Cuadro de Honor</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-toolbar">
+            <div>
+              <h3>📋 Historial de Temporadas y Fases</h3>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Edición</th>
+                  <th>Formato</th>
+                  <th>Campeón 🏆</th>
+                  <th>Subcampeón</th>
+                  <th>Goleador ⚽</th>
+                  <th>Fases Generadas</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-seasons"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PESTAÑA 4: MÓDULO AVANZADO DE PLANTILLAS (SQUADS) ==================== -->
+    <section id="tab-squads" class="tab-panel">
+      <div class="panel-grid">
+        <!-- BLOQUE A: ASIGNADOR RÁPIDO DE JUGADORES A PLANTILLA -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3>👕 Bloque A: Asignador Rápido a Plantilla</h3>
+              <p>Asigna jugadores con su dorsal y rol oficial (Titular, Suplente o Reserva).</p>
+            </div>
+          </div>
+          <form id="form-create-squad">
+            <div class="form-group">
+              <label for="squad-season">Temporada (Año) <span class="req">*</span></label>
+              <select id="squad-season" required></select>
+            </div>
+
+            <div class="form-group">
+              <label for="squad-club">Club <span class="req">*</span></label>
+              <input type="text" class="select-filter-input" data-target="squad-club" placeholder="🔍 Buscar club..." />
+              <select id="squad-club" required></select>
+              <div class="image-preview-row" id="squad-club-preview-box">
+                <img id="squad-club-crest-preview" class="thumb-crest" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='42' x='14' font-size='34'>🛡️</text></svg>" alt="Escudo" />
+                <span id="squad-club-name-preview" style="font-size:0.84rem;color:#cbd5e1;">Selecciona un club</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+                <label for="squad-player" style="margin-bottom:0;">Jugador <span class="req">*</span></label>
+                <button type="button" id="btn-open-quick-player-modal" class="btn btn-outline btn-sm">
+                  ➕ Crear Jugador Nuevo Rápido
+                </button>
+              </div>
+              <input type="text" class="select-filter-input" data-target="squad-player" placeholder="🔍 Buscar jugador..." />
+              <select id="squad-player" required></select>
+              <div class="image-preview-row" id="squad-player-preview-box">
+                <img id="squad-player-photo-preview" class="thumb-circle" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='42' x='14' font-size='34'>🏃</text></svg>" alt="Foto" />
+                <span id="squad-player-name-preview" style="font-size:0.84rem;color:#cbd5e1;">Selecciona un jugador</span>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="squad-shirt">Dorsal (Camiseta) <span class="req">*</span></label>
+                <input type="number" id="squad-shirt" min="1" max="99" value="10" required />
+              </div>
+              <div class="form-group">
+                <label for="squad-role">Rol en el Equipo <span class="req">*</span></label>
+                <select id="squad-role" required>
+                  <option value="STARTER">⭐ STARTER (Equipo Titular)</option>
+                  <option value="SUBSTITUTE">🔄 SUBSTITUTE (Suplente)</option>
+                  <option value="RESERVE">📋 RESERVE (Reserva)</option>
+                </select>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full">💾 Asignar Jugador a la Plantilla</button>
+          </form>
+        </div>
+
+        <!-- BLOQUE B: EXPLORADOR Y CONSULTA DINÁMICA DE PLANTILLAS -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3>🏟️ Bloque B: Explorador Dinámico de Plantillas por Año y Club</h3>
+              <p>Filtra por temporada y club para visualizar la pizarra de Titulares, Suplentes y Reservas.</p>
+            </div>
+          </div>
+
+          <!-- Filtros Principales del Explorador -->
+          <div class="form-row" style="margin-bottom:18px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="explorer-squad-season">📅 Filtrar por Temporada (Año)</label>
+              <select id="explorer-squad-season"></select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="explorer-squad-club">🛡️ Filtrar por Club</label>
+              <select id="explorer-squad-club"></select>
+            </div>
+          </div>
+
+          <!-- Contenedor de la Pizarra Visual -->
+          <div id="squad-explorer-board"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PESTAÑA 5 UNIFICADA: PARTIDOS, RESULTADOS E INCIDENCIAS ==================== -->
+    <section id="tab-matches" class="tab-panel">
+      <div class="panel-grid-wide">
+        <div>
+          <!-- Card 1: Registrar Partido + Suspensiones + Incidencias en un mismo flujo -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>⚽ Registrar Partido, Estado e Incidencias</h3>
+                <p>Todo en un solo flujo: Datos del encuentro, control de suspensión/aplazamiento y lista completa de eventos en transacción.</p>
+              </div>
+            </div>
+
+            <form id="form-create-match">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="match-season">Temporada <span class="req">*</span></label>
+                  <select id="match-season" required></select>
+                </div>
+                <div class="form-group">
+                  <label for="match-phase">Fase del Torneo <span class="req">*</span></label>
+                  <select id="match-phase" required></select>
+                </div>
+              </div>
+
+              <div id="match-format-banner" class="helper-box">
+                Selecciona una temporada y fase para ajustar grupos y jornadas automáticamente.
+              </div>
+
+              <div class="form-row">
+                <div class="form-group" id="group-field-wrapper">
+                  <label for="match-group">Grupo (Solo Formato Clásico)</label>
+                  <select id="match-group">
+                    <option value="">-- Sin Grupo (Eliminatoria) --</option>
+                    <option value="Grupo A">Grupo A</option>
+                    <option value="Grupo B">Grupo B</option>
+                    <option value="Grupo C">Grupo C</option>
+                    <option value="Grupo D">Grupo D</option>
+                    <option value="Grupo E">Grupo E</option>
+                    <option value="Grupo F">Grupo F</option>
+                    <option value="Grupo G">Grupo G</option>
+                    <option value="Grupo H">Grupo H</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="match-matchday" id="label-matchday">Jornada (Matchday)</label>
+                  <input type="number" id="match-matchday" min="1" max="8" placeholder="Ej: 1 a 8" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="match-home-team">Club Local <span class="req">*</span></label>
+                <input type="text" class="select-filter-input" data-target="match-home-team" placeholder="🔍 Filtrar club local..." />
+                <select id="match-home-team" required></select>
+              </div>
+
+              <div class="form-group">
+                <label for="match-away-team">Club Visitante <span class="req">*</span></label>
+                <input type="text" class="select-filter-input" data-target="match-away-team" placeholder="🔍 Filtrar club visitante..." />
+                <select id="match-away-team" required></select>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="match-home-score">Goles Local <span class="req">*</span></label>
+                  <input type="number" id="match-home-score" min="0" max="30" value="0" required />
+                </div>
+                <div class="form-group">
+                  <label for="match-away-score">Goles Visitante <span class="req">*</span></label>
+                  <input type="number" id="match-away-score" min="0" max="30" value="0" required />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="match-date">Fecha y Hora Programada <span class="req">*</span></label>
+                  <input type="datetime-local" id="match-date" required />
+                </div>
+                <div class="form-group">
+                  <label for="match-stadium">Estadio (Auto-rellenado) <span class="req">*</span></label>
+                  <input type="text" id="match-stadium" placeholder="Se autocompleta con el club local" required />
+                </div>
+              </div>
+
+              <!-- Control de Estado del Partido, Suspensiones y Aplazamientos -->
+              <div class="form-group">
+                <label for="match-status">Estado Oficial del Partido <span class="req">*</span></label>
+                <select id="match-status" required>
+                  <option value="FINISHED">✅ Finalizado normal (FINISHED)</option>
+                  <option value="SUSPENDED">⏸️ Suspendido en juego (SUSPENDED)</option>
+                  <option value="POSTPONED">📅 Aplazado antes de iniciar (POSTPONED)</option>
+                  <option value="RESUMED_AND_FINISHED">🔄 Reanudado y Finalizado (RESUMED_AND_FINISHED)</option>
+                  <option value="CANCELLED">🚫 Cancelado definitivamente (CANCELLED)</option>
+                </select>
+              </div>
+
+              <div id="suspension-fields-panel" class="suspension-panel hidden">
+                <h4 style="color:#fde68a;font-size:0.9rem;margin-bottom:10px;">
+                  ⚠️ Detalles de Suspensión o Aplazamiento
+                </h4>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="match-suspended-at">Fecha/Hora de Suspensión</label>
+                    <input type="datetime-local" id="match-suspended-at" />
+                  </div>
+                  <div class="form-group">
+                    <label for="match-suspended-minute">Minuto en que se detuvo</label>
+                    <input type="number" id="match-suspended-minute" min="1" max="130" placeholder="Ej: 42 (si ya había iniciado)" />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="match-resumed-at">Fecha/Hora de Reanudación</label>
+                    <input type="datetime-local" id="match-resumed-at" />
+                  </div>
+                  <div class="form-group">
+                    <label for="match-suspension-reason">Motivo de la Suspensión</label>
+                    <input type="text" id="match-suspension-reason" placeholder="Ej: Lluvia torrencial, Falla eléctrica, Nieve..." />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Constructor Dinámico de Incidencias del Partido -->
+              <div class="events-builder-box">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                  <strong style="color:#00d4ff;font-size:0.9rem;">⚡ + Agregar Incidencias del Partido (Opcional)</strong>
+                  <span id="draft-events-counter" class="tag tag-swiss">0 añadidas</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="draft-event-player">Jugador Protagonista</label>
+                  <input type="text" class="select-filter-input" data-target="draft-event-player" placeholder="🔍 Buscar jugador..." />
+                  <select id="draft-event-player"></select>
+                </div>
+
+                <div class="form-group">
+                  <label for="draft-event-type">Tipo de Evento (12 tipos oficiales)</label>
+                  <select id="draft-event-type">
+                    <option value="GOAL">⚽ GOAL — Gol de jugada (+1 gol al jugador)</option>
+                    <option value="PENALTY_GOAL">🎯 PENALTY_GOAL — Gol de penal (+1 gol al jugador)</option>
+                    <option value="OWN_GOAL">🥅 OWN_GOAL — Autogol (Gol en propia puerta)</option>
+                    <option value="PENALTY_MISSED">🧤 PENALTY_MISSED — Penal fallado / atajado</option>
+                    <option value="ASSIST">👟 ASSIST — Asistencia de gol</option>
+                    <option value="YELLOW_CARD">🟨 YELLOW_CARD — Tarjeta amarilla</option>
+                    <option value="SECOND_YELLOW_RED">🟨🟥 SECOND_YELLOW_RED — Doble amarilla / Expulsión</option>
+                    <option value="RED_CARD">🟥 RED_CARD — Tarjeta roja directa</option>
+                    <option value="SUBSTITUTION_IN">🟢⬆️ SUBSTITUTION_IN — Entra de cambio</option>
+                    <option value="SUBSTITUTION_OUT">🔴⬇️ SUBSTITUTION_OUT — Sale de cambio</option>
+                    <option value="VAR_CANCELLED_GOAL">📺❌ VAR_CANCELLED_GOAL — Gol anulado por VAR</option>
+                    <option value="INJURY">🚑 INJURY — Lesión en el partido</option>
+                  </select>
+                </div>
+
+                <div class="form-row-3">
+                  <div class="form-group">
+                    <label for="draft-event-minute">Minuto (1-120)</label>
+                    <input type="number" id="draft-event-minute" min="1" max="125" value="45" />
+                  </div>
+                  <div class="form-group">
+                    <label for="draft-event-extra">Adición (+Min)</label>
+                    <input type="number" id="draft-event-extra" min="1" max="30" placeholder="Ej: 4 (90+4')" />
+                  </div>
+                  <div class="form-group">
+                    <label for="draft-event-detail">Detalle / Nota</label>
+                    <input type="text" id="draft-event-detail" placeholder="Ej: Tiro libre" />
+                  </div>
+                </div>
+
+                <button type="button" id="btn-add-draft-event" class="btn btn-outline btn-full">
+                  ➕ Añadir Incidencia a la Lista del Partido
+                </button>
+
+                <div id="draft-events-list" class="draft-event-list"></div>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-full">
+                💾 Guardar Partido + Todas sus Incidencias
+              </button>
+            </form>
+          </div>
+
+          <!-- Card 2: Agregar Incidencia a un Partido Ya Existente -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>⚡ Agregar Incidencia a un Partido Ya Registrado</h3>
+                <p>Si el partido ya fue guardado antes, selecciona el encuentro aquí para sumarle nuevos eventos.</p>
+              </div>
+            </div>
+            <form id="form-create-event">
+              <div class="form-group">
+                <label for="event-match">Seleccionar Partido Existente <span class="req">*</span></label>
+                <input type="text" class="select-filter-input" data-target="event-match" placeholder="🔍 Buscar partido por clubes o año..." />
+                <select id="event-match" required></select>
+              </div>
+
+              <div class="form-group">
+                <label for="event-player">Seleccionar Jugador <span class="req">*</span></label>
+                <input type="text" class="select-filter-input" data-target="event-player" placeholder="🔍 Buscar jugador..." />
+                <select id="event-player" required></select>
+              </div>
+
+              <div class="form-group">
+                <label for="event-type">Tipo de Incidencia <span class="req">*</span></label>
+                <select id="event-type" required>
+                  <option value="GOAL">⚽ GOAL — Gol de jugada (+1 gol al jugador)</option>
+                  <option value="PENALTY_GOAL">🎯 PENALTY_GOAL — Gol de penal (+1 gol al jugador)</option>
+                  <option value="OWN_GOAL">🥅 OWN_GOAL — Autogol</option>
+                  <option value="PENALTY_MISSED">🧤 PENALTY_MISSED — Penal fallado / atajado</option>
+                  <option value="ASSIST">👟 ASSIST — Asistencia de gol</option>
+                  <option value="YELLOW_CARD">🟨 YELLOW_CARD — Tarjeta amarilla</option>
+                  <option value="SECOND_YELLOW_RED">🟨🟥 SECOND_YELLOW_RED — Doble amarilla / Roja</option>
+                  <option value="RED_CARD">🟥 RED_CARD — Tarjeta roja directa</option>
+                  <option value="SUBSTITUTION_IN">🟢⬆️ SUBSTITUTION_IN — Entra de cambio</option>
+                  <option value="SUBSTITUTION_OUT">🔴⬇️ SUBSTITUTION_OUT — Sale de cambio</option>
+                  <option value="VAR_CANCELLED_GOAL">📺❌ VAR_CANCELLED_GOAL — Gol anulado por VAR</option>
+                  <option value="INJURY">🚑 INJURY — Lesión</option>
+                </select>
+              </div>
+
+              <div class="form-row-3">
+                <div class="form-group">
+                  <label for="event-minute">Minuto <span class="req">*</span></label>
+                  <input type="number" id="event-minute" min="1" max="125" value="75" required />
+                </div>
+                <div class="form-group">
+                  <label for="event-extra-minute">Adición (+Min)</label>
+                  <input type="number" id="event-extra-minute" min="1" max="30" placeholder="Ej: 3" />
+                </div>
+                <div class="form-group">
+                  <label for="event-detail">Detalle</label>
+                  <input type="text" id="event-detail" placeholder="Opcional" />
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-gold btn-full">⚡ Registrar Incidencia en Partido</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Tabla en Vivo de Partidos, Suspensiones y Cronología de Incidencias -->
+        <div>
+          <div class="card">
+            <div class="table-toolbar">
+              <div>
+                <h3>📋 Partidos, Estados e Incidencias en Vivo</h3>
+              </div>
+              <input type="text" id="search-matches-table" class="table-search" placeholder="🔍 Filtrar por equipo, fase o estado..." />
+            </div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Edición / Fase</th>
+                    <th>Encuentro</th>
+                    <th>Estado / Estadio</th>
+                    <th>Cronología de Incidencias</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-matches"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== MODAL RÁPIDO PARA CREAR JUGADOR DESDE PLANTILLAS ==================== -->
+  <div id="quick-player-modal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="card-header">
+        <div>
+          <h3>➕ Crear Jugador Rápido</h3>
+          <p>Se agregará automáticamente al selector de tu plantilla actual.</p>
+        </div>
+        <button type="button" id="btn-close-quick-player-modal" class="btn btn-outline btn-sm">✖ Cerrar</button>
+      </div>
+      <form id="form-quick-modal-player">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modal-player-first">Nombre <span class="req">*</span></label>
+            <input type="text" id="modal-player-first" placeholder="Ej: Jude" required />
+          </div>
+          <div class="form-group">
+            <label for="modal-player-last">Apellido <span class="req">*</span></label>
+            <input type="text" id="modal-player-last" placeholder="Ej: Bellingham" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modal-player-nat">País UEFA <span class="req">*</span></label>
+            <select id="modal-player-nat" required></select>
+          </div>
+          <div class="form-group">
+            <label for="modal-player-pos">Posición <span class="req">*</span></label>
+            <select id="modal-player-pos" required>
+              <option value="Midfielder">Midfielder (Mediocampista)</option>
+              <option value="Forward">Forward (Delantero)</option>
+              <option value="Defender">Defender (Defensa)</option>
+              <option value="Goalkeeper">Goalkeeper (Portero)</option>
+            </select>
+          </div>
+        </div>
+        <div class="image-uploader-box">
+          <label>📸 Foto del Jugador (Subir archivo o pegar URL)</label>
+          <div class="form-group" style="margin-top:6px;">
+            <input type="file" id="modal-player-photo-file" accept="image/*" />
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <input type="text" id="modal-player-photo-url" placeholder="URL de la foto" />
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">💾 Crear y Seleccionar en Plantilla</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Contenedor de notificaciones Toast -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="/admin/app.js"></script>
+</body>
+</html>

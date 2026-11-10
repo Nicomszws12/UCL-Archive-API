@@ -1,0 +1,155 @@
+import nodemailer from 'nodemailer';
+
+interface OtpEntry {
+  code: string;
+  expiresAt: number;
+  attempts: number;
+}
+
+// Almacén en memoria de códigos OTP temporales
+const otpStore = new Map<string, OtpEntry>();
+
+// Duración del código: 10 minutos
+const OTP_TTL_MS = 10 * 60 * 1000;
+const MAX_ATTEMPTS = 5;
+
+/**
+ * Genera y almacena un código de 6 dígitos para un correo electrónico
+ */
+export function generateOtp(email: string): string {
+  const normalized = email.trim().toLowerCase();
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+  otpStore.set(normalized, {
+    code,
+    expiresAt: Date.now() + OTP_TTL_MS,
+    attempts: 0
+  });
+
+  return code;
+}
+
+/**
+ * Valida el código OTP de 6 dígitos ingresado por el usuario
+ */
+export function verifyOtp(email: string, codeInput: string): { valid: boolean; error?: string } {
+  const normalized = email.trim().toLowerCase();
+  const entry = otpStore.get(normalized);
+
+  if (!entry) {
+    return { valid: false, error: 'No hay un código pendiente o ha expirado. Solicita un nuevo código.' };
+  }
+
+  if (Date.now() > entry.expiresAt) {
+    otpStore.delete(normalized);
+    return { valid: false, error: 'El código de seguridad ha expirado. Solicita uno nuevo.' };
+  }
+
+  if (entry.attempts >= MAX_ATTEMPTS) {
+    otpStore.delete(normalized);
+    return { valid: false, error: 'Has superado el límite de intentos fallidos. Solicita un nuevo código.' };
+  }
+
+  const cleanInput = String(codeInput).trim();
+  if (entry.code !== cleanInput) {
+    entry.attempts += 1;
+    return {
+      valid: false,
+      error: `Código de verificación incorrecto. Intento ${entry.attempts} de ${MAX_ATTEMPTS}.`
+    };
+  }
+
+  // Código correcto: se consume y se elimina para evitar reusabilidad
+  otpStore.delete(normalized);
+  return { valid: true };
+}
+
+/**
+ * Envía el código de verificación por correo electrónico (Nodemailer / Gmail)
+ * y además lo imprime con formato destacado en la terminal para pruebas inmediatas.
+ */
+export async function sendOtpEmail(
+  email: string,
+  code: string,
+  recipientName = 'SuperAdmin'
+): Promise<{ sentViaSmtp: boolean; error?: string }> {
+  const smtpUser = process.env.SMTP_USER || 'nicolasnieto191213@gmail.com';
+  const smtpPass = process.env.SMTP_PASS || '';
+
+  // 1. Siempre mostramos el código en la consola del servidor con alto impacto visual
+  console.log('\n' + '═'.repeat(68));
+  console.log(` 🔐 [UEFA ARCHIVE 2FA] CÓDIGO DE VERIFICACIÓN SUPERADMIN (${recipientName})`);
+  console.log(` 📧 Destinatario : ${email}`);
+  console.log(` 🔑 CÓDIGO OTP   : [ ${code.split('').join(' ')} ]`);
+  console.log(` ⏱️  Validez      : 10 minutos`);
+  if (!smtpPass) {
+    console.log(' ℹ️  Nota SMTP    : Para entrega directa en bandeja Gmail, añade tu');
+    console.log('                   Contraseña de Aplicación de Google a SMTP_PASS en .env');
+  }
+  console.log('═'.repeat(68) + '\n');
+
+  // 2. Si no hay contraseña de aplicación configurada en .env, avisamos que quedó en consola
+  if (!smtpPass.trim()) {
+    return { sentViaSmtp: false };
+  }
+
+  // 3. Si hay contraseña de aplicación configurada, enviamos el correo real
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: smtpUser,
+        pass: smtpPass.trim()
+      }
+    });
+
+    const htmlContent = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #060b17; color: #ffffff; padding: 40px 20px; border-radius: 12px; max-width: 540px; margin: 0 auto; border: 1px solid #1a2a47;">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h1 style="color: #00d2ff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: 1px;">
+            🏆 UEFA CHAMPIONS LEAGUE ARCHIVE
+          </h1>
+          <p style="color: #8da2c0; font-size: 14px; margin: 8px 0 0 0;">
+            Autenticación de Doble Factor — Acceso SuperAdmin
+          </p>
+        </div>
+
+        <div style="background: rgba(14, 27, 49, 0.95); border-radius: 10px; padding: 24px; border: 1px solid #203a66; text-align: center;">
+          <p style="color: #e2e8f0; font-size: 15px; margin-top: 0;">
+            Hola <strong>${recipientName}</strong> (<code>${email}</code>), se ha solicitado un inicio de sesión de SuperAdmin con tus credenciales maestras.
+          </p>
+          <p style="color: #94a3b8; font-size: 13px;">
+            Ingresa el siguiente código de seguridad en el panel para desbloquear el sistema:
+          </p>
+
+          <div style="background: #020814; border: 2px dashed #00d2ff; border-radius: 8px; padding: 16px; margin: 24px 0; display: inline-block;">
+            <span style="font-family: 'Courier New', monospace; font-size: 36px; font-weight: 900; letter-spacing: 10px; color: #ffd700;">
+              ${code}
+            </span>
+          </div>
+
+          <p style="color: #f59e0b; font-size: 12px; margin-bottom: 0;">
+            ⏱️ Este código es de un solo uso y expirará en <strong>10 minutos</strong>.
+          </p>
+        </div>
+
+        <div style="margin-top: 24px; text-align: center; font-size: 11px; color: #64748b;">
+          Si tú no solicitaste este código, te recomendamos revisar tus credenciales de inmediato.
+        </div>
+      </div>
+    `;
+
+    await transporter.sendMail({
+      from: `"UEFA Champions League Archive" <${smtpUser}>`,
+      to: email,
+      subject: `🔐 Tu Código de Seguridad SuperAdmin: ${code}`,
+      html: htmlContent
+    });
+
+    return { sentViaSmtp: true };
+  } catch (err: any) {
+    console.error('Error al enviar correo por Gmail SMTP:', err.message);
+    return { sentViaSmtp: false, error: err.message };
+  }
+}
+

@@ -1,0 +1,183 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Formato del torneo según la época
+enum TournamentFormat {
+  CLASSIC_GROUPS // 1992/93 hasta 2023/24 (Fase de grupos tradicional)
+  SWISS_LEAGUE   // 2024/25 en adelante (Fase Liga única de 36 clubes, 8 partidos)
+}
+
+// Fases oficiales (históricas y nuevo formato 2024/25+)
+enum PhaseCode {
+  GROUP_STAGE       // Fase de Grupos (1992 - 2024)
+  LEAGUE_PHASE      // Fase Liga - Sistema Suizo 36 equipos (2024/25+)
+  KNOCKOUT_PLAYOFFS // Play-offs eliminatorios 9º al 24º puesto (2024/25+)
+  ROUND_OF_16       // Octavos de final
+  QUARTER_FINALS    // Cuartos de final
+  SEMI_FINALS       // Semifinales
+  FINAL             // Final
+}
+
+// Rol del jugador dentro de la plantilla del club
+enum SquadRole {
+  STARTER    // Titular
+  SUBSTITUTE // Suplente
+  RESERVE    // Reserva
+}
+
+// Estado oficial del partido (incluyendo suspensiones y aplazamientos)
+enum MatchStatus {
+  FINISHED             // Finalizado normal
+  SUSPENDED            // Suspendido en juego
+  POSTPONED            // Aplazado antes de iniciar
+  RESUMED_AND_FINISHED // Reanudado y finalizado en otra fecha
+  CANCELLED            // Cancelado definitivamente
+}
+
+// Todos los tipos de eventos posibles en un partido
+enum EventType {
+  GOAL               // Gol de jugada
+  PENALTY_GOAL       // Gol de penal
+  OWN_GOAL           // Autogol
+  PENALTY_MISSED     // Penal fallado / atajado
+  ASSIST             // Asistencia
+  YELLOW_CARD        // Tarjeta amarilla
+  SECOND_YELLOW_RED  // Doble amarilla / Roja
+  RED_CARD           // Tarjeta roja directa
+  SUBSTITUTION_IN    // Entra de cambio
+  SUBSTITUTION_OUT   // Sale de cambio
+  VAR_CANCELLED_GOAL // Gol anulado por VAR
+  INJURY             // Lesión
+}
+
+// 1. Temporada (Season)
+model Season {
+  id            Int              @id @default(autoincrement())
+  year_start    Int              // Ej: 2024
+  year_end      Int              // Ej: 2025
+  format        TournamentFormat @default(CLASSIC_GROUPS)
+  teams_count   Int              @default(32) // 32 clásico, 36 desde 2024/25
+  champion_id   Int?
+  runner_up_id  Int?
+  top_scorer_id Int?
+
+  // Relaciones
+  champion      Club?         @relation("SeasonChampion", fields: [champion_id], references: [id], onDelete: SetNull)
+  runner_up     Club?         @relation("SeasonRunnerUp", fields: [runner_up_id], references: [id], onDelete: SetNull)
+  top_scorer    Player?       @relation("SeasonTopScorer", fields: [top_scorer_id], references: [id], onDelete: SetNull)
+  phases        Phase[]
+  matches       Match[]
+  squad_members SquadMember[]
+
+  @@unique([year_start, year_end])
+}
+
+// Fase del torneo
+model Phase {
+  id        Int       @id @default(autoincrement())
+  code      PhaseCode // Código estandarizado para filtrar en la API
+  name      String    // Ej: "Fase Liga", "Play-offs Eliminatorios", "Octavos", "Final"
+  season_id Int
+
+  season    Season    @relation(fields: [season_id], references: [id], onDelete: Cascade)
+  matches   Match[]
+}
+
+// 2. Club
+model Club {
+  id           Int     @id @default(autoincrement())
+  name         String  @unique
+  short_name   String  // Ej: "RMA", "FCB", "LIV"
+  country_code String  // Ej: "ESP", "ITA", "ENG", "GER"
+  stadium      String
+  titles_count Int     @default(0)
+  crest_url    String? // URL o ruta del escudo del club
+
+  // Relaciones inversas
+  championships Season[]      @relation("SeasonChampion")
+  runner_ups    Season[]      @relation("SeasonRunnerUp")
+  squad_members SquadMember[]
+  home_matches  Match[]       @relation("HomeTeam")
+  away_matches  Match[]       @relation("AwayTeam")
+}
+
+// 3. Jugador (Player)
+model Player {
+  id                Int     @id @default(autoincrement())
+  first_name        String
+  last_name         String
+  nationality       String  // Ej: "POR", "ESP", "FRA"
+  position          String  // Ej: "Forward", "Midfielder", "Defender", "Goalkeeper"
+  active            Boolean @default(true)
+  total_goals       Int     @default(0)
+  total_appearances Int     @default(0)
+  photo_url         String? // URL o ruta de la foto del jugador
+
+  // Relaciones inversas
+  top_scorer_seasons Season[]      @relation("SeasonTopScorer")
+  squad_members      SquadMember[]
+  match_events       MatchEvent[]
+}
+
+// Plantilla (Relación entre Club y Player por temporada)
+model SquadMember {
+  id           Int       @id @default(autoincrement())
+  club_id      Int
+  player_id    Int
+  season_id    Int?
+  shirt_number Int?
+  role         SquadRole @default(STARTER)
+
+  club   Club    @relation(fields: [club_id], references: [id], onDelete: Cascade)
+  player Player  @relation(fields: [player_id], references: [id], onDelete: Cascade)
+  season Season? @relation(fields: [season_id], references: [id], onDelete: SetNull)
+}
+
+// 4. Partido (Match)
+model Match {
+  id                Int         @id @default(autoincrement())
+  season_id         Int
+  phase_id          Int
+  matchday          Int?        // Jornada (1 a 6 en Grupos clásicos; 1 a 8 en Fase Liga Suiza)
+  group_name        String?     // "Grupo A".."Grupo H" en formato clásico; NULL en Fase Liga 2024/25+
+  home_team_id      Int
+  away_team_id      Int
+  home_score        Int         @default(0)
+  away_score        Int         @default(0)
+  match_date        DateTime
+  stadium           String
+  status            MatchStatus @default(FINISHED)
+  suspended_at      DateTime?   // Fecha y hora en que se suspendió o aplazó
+  suspended_minute  Int?        // Minuto del partido en que se detuvo
+  resumed_at        DateTime?   // Nueva fecha y hora en que se reanudó y terminó
+  suspension_reason String?     // Motivo (Ej: "Lluvia torrencial", "Falla eléctrica")
+
+  season    Season       @relation(fields: [season_id], references: [id], onDelete: Cascade)
+  phase     Phase        @relation(fields: [phase_id], references: [id], onDelete: Cascade)
+  home_team Club         @relation("HomeTeam", fields: [home_team_id], references: [id], onDelete: Cascade)
+  away_team Club         @relation("AwayTeam", fields: [away_team_id], references: [id], onDelete: Cascade)
+  events    MatchEvent[]
+
+  @@index([match_date])
+  @@index([season_id])
+}
+
+// 5. Incidencias del Partido (MatchEvent)
+model MatchEvent {
+  id           Int       @id @default(autoincrement())
+  match_id     Int
+  player_id    Int
+  type         EventType
+  minute       Int
+  extra_minute Int?      // Minuto de descuento / adición (ej: 4 para 90+4')
+  detail       String?   // Nota opcional del evento
+
+  match  Match  @relation(fields: [match_id], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [player_id], references: [id], onDelete: Cascade)
+}
