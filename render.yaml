@@ -26,3 +26,7 @@ services:
         value: nicolasnieto191213@gmail.com
       - key: SMTP_PASS
         sync: false
+      - key: SMTP_2_USER
+        sync: false
+      - key: SMTP_2_PASS
+        sync: false

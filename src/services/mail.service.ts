@@ -64,46 +64,53 @@ export function verifyOtp(email: string, codeInput: string): { valid: boolean; e
   return { valid: true };
 }
 
+export interface CustomSmtpConfig {
+  user?: string;
+  pass?: string;
+}
+
 /**
  * Envía el código de verificación por correo electrónico (Nodemailer / Gmail)
+ * soportando el SMTP propio de cada SuperAdmin (o el SMTP principal como respaldo)
  * y además lo imprime con formato destacado en la terminal para pruebas inmediatas.
  */
 export async function sendOtpEmail(
   email: string,
   code: string,
-  recipientName = 'SuperAdmin'
+  recipientName = 'SuperAdmin',
+  customSmtp?: CustomSmtpConfig
 ): Promise<{ sentViaSmtp: boolean; error?: string }> {
-  const smtpUser = process.env.SMTP_USER || 'nicolasnieto191213@gmail.com';
-  const smtpPass = process.env.SMTP_PASS || '';
+  const primaryUser = (process.env.SMTP_USER || 'nicolasnieto191213@gmail.com').trim();
+  const primaryPass = (process.env.SMTP_PASS || '').trim();
+
+  // Si la cuenta tiene su propio SMTP_2_USER y SMTP_2_PASS configurados, los usa;
+  // de lo contrario, usa automáticamente el SMTP principal para que el correo llegue igual.
+  const hasCustomSmtp =
+    Boolean(customSmtp?.user && customSmtp.user.trim() && customSmtp.user.trim() !== 'correo_de_tu_amigo@gmail.com') &&
+    Boolean(customSmtp?.pass && customSmtp.pass.trim());
+
+  const activeSmtpUser = hasCustomSmtp ? customSmtp!.user!.trim() : primaryUser;
+  const activeSmtpPass = hasCustomSmtp ? customSmtp!.pass!.trim() : primaryPass;
 
   // 1. Siempre mostramos el código en la consola del servidor con alto impacto visual
   console.log('\n' + '═'.repeat(68));
   console.log(` 🔐 [UEFA ARCHIVE 2FA] CÓDIGO DE VERIFICACIÓN SUPERADMIN (${recipientName})`);
   console.log(` 📧 Destinatario : ${email}`);
+  console.log(` 📤 Remitente    : ${activeSmtpUser}`);
   console.log(` 🔑 CÓDIGO OTP   : [ ${code.split('').join(' ')} ]`);
   console.log(` ⏱️  Validez      : 10 minutos`);
-  if (!smtpPass) {
+  if (!activeSmtpPass) {
     console.log(' ℹ️  Nota SMTP    : Para entrega directa en bandeja Gmail, añade tu');
-    console.log('                   Contraseña de Aplicación de Google a SMTP_PASS en .env');
+    console.log('                   Contraseña de Aplicación de Google a SMTP_PASS o SMTP_2_PASS en .env');
   }
   console.log('═'.repeat(68) + '\n');
 
   // 2. Si no hay contraseña de aplicación configurada en .env, avisamos que quedó en consola
-  if (!smtpPass.trim()) {
+  if (!activeSmtpPass) {
     return { sentViaSmtp: false };
   }
 
-  // 3. Si hay contraseña de aplicación configurada, enviamos el correo real
-  try {
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: smtpUser,
-        pass: smtpPass.trim()
-      }
-    });
-
-    const htmlContent = `
+  const htmlContent = `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #060b17; color: #ffffff; padding: 40px 20px; border-radius: 12px; max-width: 540px; margin: 0 auto; border: 1px solid #1a2a47;">
         <div style="text-align: center; margin-bottom: 24px;">
           <h1 style="color: #00d2ff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: 1px;">
@@ -139,8 +146,18 @@ export async function sendOtpEmail(
       </div>
     `;
 
+  // 3. Enviamos el correo (y si el SMTP 2 falla pero existe el SMTP 1 principal, reintenta con el principal)
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: activeSmtpUser,
+        pass: activeSmtpPass
+      }
+    });
+
     await transporter.sendMail({
-      from: `"UEFA Champions League Archive" <${smtpUser}>`,
+      from: `"UEFA Champions League Archive" <${activeSmtpUser}>`,
       to: email,
       subject: `🔐 Tu Código de Seguridad SuperAdmin: ${code}`,
       html: htmlContent
@@ -148,6 +165,29 @@ export async function sendOtpEmail(
 
     return { sentViaSmtp: true };
   } catch (err: any) {
+    // Si falló el SMTP_2 personalizado pero tenemos el SMTP_1 principal configurado, respaldamos el envío
+    if (hasCustomSmtp && primaryPass && activeSmtpUser !== primaryUser) {
+      try {
+        const fallbackTransporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+            user: primaryUser,
+            pass: primaryPass
+          }
+        });
+        await fallbackTransporter.sendMail({
+          from: `"UEFA Champions League Archive" <${primaryUser}>`,
+          to: email,
+          subject: `🔐 Tu Código de Seguridad SuperAdmin: ${code}`,
+          html: htmlContent
+        });
+        return { sentViaSmtp: true };
+      } catch (fallbackErr: any) {
+        console.error('Error al enviar correo por Gmail SMTP de respaldo:', fallbackErr.message);
+        return { sentViaSmtp: false, error: fallbackErr.message };
+      }
+    }
+
     console.error('Error al enviar correo por Gmail SMTP:', err.message);
     return { sentViaSmtp: false, error: err.message };
   }

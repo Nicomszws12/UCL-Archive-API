@@ -20,6 +20,8 @@ interface SuperAdminAccount {
   name: string;
   email: string;
   password: string;
+  smtpUser?: string;
+  smtpPass?: string;
 }
 
 function getSuperAdminAccounts(): SuperAdminAccount[] {
@@ -27,13 +29,17 @@ function getSuperAdminAccounts(): SuperAdminAccount[] {
     {
       name: 'Nicolás (SuperAdmin Principal)',
       email: (process.env.SUPERADMIN_EMAIL || 'nicolasnieto191213@gmail.com').trim().toLowerCase(),
-      password: process.env.SUPERADMIN_PASSWORD || 'N4k0laz1122$*'
+      password: process.env.SUPERADMIN_PASSWORD || 'N4k0laz1122$*',
+      smtpUser: process.env.SMTP_USER || process.env.SUPERADMIN_EMAIL || 'nicolasnieto191213@gmail.com',
+      smtpPass: process.env.SMTP_PASS || ''
     },
     {
-      // 👉 CREDENCIALES DE TU AMIGO (SUPERADMIN 2):
+      // 👉 CREDENCIALES Y SMTP DE TU AMIGO (SUPERADMIN 2):
       name: process.env.SUPERADMIN_2_NAME || 'Co-Desarrollador (SuperAdmin 2)',
       email: (process.env.SUPERADMIN_2_EMAIL || 'correo_de_tu_amigo@gmail.com').trim().toLowerCase(),
-      password: process.env.SUPERADMIN_2_PASSWORD || 'PasswordAmigo2026$*'
+      password: process.env.SUPERADMIN_2_PASSWORD || 'PasswordAmigo2026$*',
+      smtpUser: process.env.SMTP_2_USER || process.env.SUPERADMIN_2_EMAIL || '',
+      smtpPass: process.env.SMTP_2_PASS || ''
     }
   ];
 
@@ -84,8 +90,11 @@ router.post('/auth/request-code', authLimiter, async (req: Request, res: Respons
   // Generamos el código OTP de 6 dígitos
   const code = generateOtp(normalizedEmail);
 
-  // Enviamos por correo (y registramos en consola del servidor)
-  const mailResult = await sendOtpEmail(normalizedEmail, code, matchedAdmin.name);
+  // Enviamos por correo usando el SMTP de la cuenta (o el principal de respaldo) y registramos en consola
+  const mailResult = await sendOtpEmail(normalizedEmail, code, matchedAdmin.name, {
+    user: matchedAdmin.smtpUser,
+    pass: matchedAdmin.smtpPass
+  });
 
   res.json({
     message: `Código de verificación de 6 dígitos generado para ${normalizedEmail}`,
