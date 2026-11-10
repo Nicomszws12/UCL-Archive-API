@@ -146,14 +146,38 @@ export async function sendOtpEmail(
       </div>
     `;
 
-  // 3. Enviamos el correo (y si el SMTP 2 falla pero existe el SMTP 1 principal, reintenta con el principal)
+  // 3. Si existe un Webhook HTTPS de Google Apps Script (Puerto 443 - Ideal para Render Free Tier que bloquea puertos SMTP 465/587)
+  const googleScriptUrl = (process.env.GOOGLE_SCRIPT_URL || '').trim();
+  if (googleScriptUrl.startsWith('https://')) {
+    try {
+      const response = await fetch(googleScriptUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: email,
+          subject: `🔐 Tu Código de Seguridad SuperAdmin: ${code}`,
+          htmlBody: htmlContent
+        })
+      });
+      if (response.ok) {
+        return { sentViaSmtp: true };
+      }
+    } catch (webhookErr: any) {
+      console.error('Error en Google Script Webhook HTTPS:', webhookErr.message);
+    }
+  }
+
+  // 4. Enviamos el correo por SMTP (y si el SMTP 2 falla pero existe el SMTP 1 principal, reintenta con el principal)
   try {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
         user: activeSmtpUser,
-        pass: activeSmtpPass
-      }
+        pass: activeSmtpPass.replace(/\s+/g, '')
+      },
+      connectionTimeout: 7000,
+      greetingTimeout: 7000,
+      socketTimeout: 10000
     });
 
     await transporter.sendMail({
@@ -172,8 +196,11 @@ export async function sendOtpEmail(
           service: 'gmail',
           auth: {
             user: primaryUser,
-            pass: primaryPass
-          }
+            pass: primaryPass.replace(/\s+/g, '')
+          },
+          connectionTimeout: 7000,
+          greetingTimeout: 7000,
+          socketTimeout: 10000
         });
         await fallbackTransporter.sendMail({
           from: `"UEFA Champions League Archive" <${primaryUser}>`,

@@ -61,4 +61,17 @@ app.listen(PORT, () => {
   console.log(`🛡️ Panel Web SuperAdmin:        http://localhost:${PORT}/admin`);
   console.log(`📖 Documentación Swagger UI:    http://localhost:${PORT}/api-docs`);
   console.log('=======================================================');
+
+  // Auto-Ping (Keep-Alive) cada 12 minutos en Render para evitar que la instancia gratuita entre en reposo
+  const externalUrl = process.env.RENDER_EXTERNAL_URL || '';
+  if (externalUrl) {
+    setInterval(async () => {
+      try {
+        await fetch(`${externalUrl}/api/v1/health`);
+        console.log(`🔄 [Keep-Alive] Ping enviado a ${externalUrl}/api/v1/health`);
+      } catch (_err) {
+        // Ignorar errores de red temporales
+      }
+    }, 12 * 60 * 1000);
+  }
 });

@@ -1144,6 +1144,34 @@
             <strong>¿En qué se usó?:</strong> Desarrollo de este panel interactivo en <code>public/admin/</code> (<code>index.html</code>, <code>styles.css</code>, <code>app.js</code>). Conecta en vivo con la API mediante <code>fetch()</code> asíncrono, filtra las 55 federaciones de la UEFA por región geográfica, previsualiza imágenes al instante y permite gestionar temporadas, plantillas y partidos de forma 100% visual.
           </p>
         </div>
+
+        <!-- 11. Neon Serverless PostgreSQL -->
+        <div class="credits-tech-card">
+          <div class="tech-card-top">
+            <span class="tech-icon">🟢</span>
+            <div>
+              <h4>Neon.tech (Serverless PostgreSQL)</h4>
+              <span class="tech-role-badge badge-cyan">Base de Datos Cloud en Producción</span>
+            </div>
+          </div>
+          <p>
+            <strong>¿En qué se usó?:</strong> Alojamiento en la nube (AWS US East Ohio) de la base de datos PostgreSQL de producción (<code>neondb</code>) con Connection Pooling y cifrado SSL. Permite que todos los datos registrados por los SuperAdmins persistan de forma segura y compartida en internet 24/7.
+          </p>
+        </div>
+
+        <!-- 12. Render Cloud & GitHub CI/CD -->
+        <div class="credits-tech-card">
+          <div class="tech-card-top">
+            <span class="tech-icon">☁️</span>
+            <div>
+              <h4>Render.com &amp; GitHub CI/CD</h4>
+              <span class="tech-role-badge badge-gold">Despliegue Cloud y Servidor en Vivo</span>
+            </div>
+          </div>
+          <p>
+            <strong>¿En qué se usó?:</strong> Plataforma Cloud (PaaS) conectada directamente al repositorio oficial de GitHub (<code>Nicomszws12/UCL-Archive-API</code>). Automatiza el despliegue continuo (CI/CD) ejecutando <code>npm install &amp;&amp; npx prisma generate &amp;&amp; npx prisma db push</code> y manteniendo en línea tanto la API como el panel SuperAdmin y Swagger UI.
+          </p>
+        </div>
       </div>
     </section>
 
@@ -1154,7 +1182,7 @@
     <div class="footer-inner">
       <div class="footer-brand">
         <strong>🏆 UEFA Champions League Archive API v2.0 — Proyecto de Desarrollo de API RESTful</strong>
-        <span>Stack: TypeScript • Node.js • Express • PostgreSQL • Prisma ORM • JWT 2FA • Redis • Swagger • Thunder Client • Multer • HTML5/CSS3/JS</span>
+        <span>Stack: TypeScript • Node.js • Express • PostgreSQL • Neon.tech • Render Cloud • Prisma ORM • JWT 2FA • Redis • Swagger • Thunder Client</span>
       </div>
       <div class="footer-actions">
         <button type="button" id="btn-open-credits-tab" class="btn btn-outline btn-sm">
