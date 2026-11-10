@@ -599,6 +599,14 @@ function setupTabs() {
       document.getElementById(targetId)?.classList.add('active');
     });
   });
+
+  document.getElementById('btn-open-credits-tab')?.addEventListener('click', () => {
+    const creditsTabBtn = document.querySelector('.tab-btn[data-tab="tab-credits"]');
+    if (creditsTabBtn) {
+      creditsTabBtn.click();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
 }
 
 // ==================== CARGA Y SINCRONIZACIÓN DE DATOS ====================

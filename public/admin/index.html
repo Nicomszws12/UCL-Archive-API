@@ -206,6 +206,7 @@
       <button type="button" class="tab-btn" data-tab="tab-seasons">🏆 3. Temporadas</button>
       <button type="button" class="tab-btn" data-tab="tab-squads">👕 4. Plantillas (Squads)</button>
       <button type="button" class="tab-btn" data-tab="tab-matches">⚽ 5. Partidos, Resultados e Incidencias</button>
+      <button type="button" class="tab-btn" data-tab="tab-credits">💻 6. Créditos &amp; Stack de la API</button>
     </nav>
   </div>
 
@@ -966,7 +967,205 @@
       </div>
     </section>
 
+    <!-- ==================== PESTAÑA 6: CRÉDITOS, ARQUITECTURA Y STACK DE LA API ==================== -->
+    <section id="tab-credits" class="tab-panel">
+      <!-- Banner Principal del Desarrollo de la API -->
+      <div class="credits-hero-card">
+        <div class="credits-hero-badge">🚀 PROYECTO DE INGENIERÍA &amp; DESARROLLO DE API RESTFUL (v2.0)</div>
+        <h2>UEFA Champions League Historical Archive API &amp; SuperAdmin Dashboard</h2>
+        <p class="credits-hero-desc">
+          Este sistema fue diseñado y construido desde cero como un proyecto integral de <strong>Desarrollo de una API RESTful Profesional</strong> con arquitectura de datos relacional, transacciones atómicas, seguridad de doble factor (2FA), caché de alto rendimiento, documentación OpenAPI 3.0 y un panel web interactivo de administración.
+        </p>
+
+        <div class="credits-team-row">
+          <div class="credits-dev-pill">
+            <span class="dev-avatar">👑</span>
+            <div>
+              <strong>Nicolás Nieto</strong>
+              <span>Arquitecto Backend &amp; Full-Stack Lead (SuperAdmin)</span>
+            </div>
+          </div>
+          <div class="credits-dev-pill">
+            <span class="dev-avatar">🛡️</span>
+            <div>
+              <strong>Co-Desarrollador</strong>
+              <span>Ingeniería de Datos &amp; API Testing (SuperAdmin)</span>
+            </div>
+          </div>
+          <a href="https://github.com/Nicomszws12/UCL-Archive-API" target="_blank" class="credits-repo-btn">
+            🐙 Ver Repositorio Oficial en GitHub
+          </a>
+        </div>
+      </div>
+
+      <!-- Cuadrícula Detallada de Lenguajes, Tecnologías y Herramientas -->
+      <div class="credits-section-title">
+        <h3>🛠️ Lenguajes, Motores y Herramientas Utilizadas (¿En qué se usó cada tecnología?)</h3>
+        <p>Especificación técnica de cada componente que hace funcionar la API y el Panel SuperAdmin:</p>
+      </div>
+
+      <div class="credits-stack-grid">
+        <!-- 1. TypeScript -->
+        <div class="credits-tech-card">
+          <div class="tech-card-top">
+            <span class="tech-icon">🟦</span>
+            <div>
+              <h4>TypeScript (TS v7 / tsx)</h4>
+              <span class="tech-role-badge badge-cyan">Lenguaje Principal del Backend</span>
+            </div>
+          </div>
+          <p>
+            <strong>¿En qué se usó?:</strong> Todo el código fuente del servidor (carpeta <code>src/</code>) está escrito en TypeScript con tipado estático estricto. Se utilizó para tipar las peticiones y respuestas HTTP (<code>Request</code>, <code>Response</code>, <code>AuthRequest</code>), los middlewares de seguridad, la configuración de Swagger y las consultas a base de datos, evitando errores en tiempo de ejecución mediante validación con <code>npx tsc --noEmit</code>.
+          </p>
+        </div>
+
+        <!-- 2. Node.js & Express -->
+        <div class="credits-tech-card">
+          <div class="tech-card-top">
+            <span class="tech-icon">🟩</span>
+            <div>
+              <h4>Node.js &amp; Express.js (v5)</h4>
+              <span class="tech-role-badge badge-gold">Motor y Framework de la API REST</span>
+            </div>
+          </div>
+          <p>
+            <strong>¿En qué se usó?:</strong> Construcción del servidor HTTP y la arquitectura modular de endpoints bajo el prefijo <code>/api/v1</code>. Divide limpiamente las rutas públicas de lectura (<code>public.routes.ts</code>) de las rutas protegidas de escritura (<code>admin.routes.ts</code>), gestiona políticas CORS, parseo JSON y sirve los archivos estáticos del panel en <code>/admin</code>.
+          </p>
+        </div>
+
+        <!-- 3. PostgreSQL -->
+        <div class="credits-tech-card">
+          <div class="tech-card-top">
+            <span class="tech-icon">🐘</span>
+            <div>
+              <h4>PostgreSQL (ucl_archive)</h4>
+              <span class="tech-role-badge badge-cyan">Base de Datos Relacional SQL</span>
+            </div>
+          </div>
+          <p>
+            <strong>¿En qué se usó?:</strong> Motor de persistencia relacional donde se almacenan las 7 entidades del sistema (<code>Season</code>, <code>Phase</code>, <code>Club</code>, <code>Player</code>, <code>SquadMember</code>, <code>Match</code> y <code>MatchEvent</code>). Garantiza integridad referencial mediante llaves foráneas (Foreign Keys), índices únicos (ej: nombres de clubes y años de temporada) y borrado en cascada (<code>onDelete: Cascade</code>).
+          </p>
+        </div>
+
+        <!-- 4. Prisma ORM -->
+        <div class="credits-tech-card">
+          <div class="tech-card-top">
+            <span class="tech-icon">💎</span>
+            <div>
+              <h4>Prisma ORM (@prisma/client)</h4>
+              <span class="tech-role-badge badge-gold">Modelado, Migraciones y Transacciones</span>
+            </div>
+          </div>
+          <p>
+            <strong>¿En qué se usó?:</strong> Definición del esquema de datos en <code>prisma/schema.prisma</code>, Enums oficiales (<code>TournamentFormat</code>, <code>PhaseCode</code>, <code>SquadRole</code>, <code>MatchStatus</code>, <code>EventType</code>) y ejecución de <strong>transacciones atómicas (<code>prisma.$transaction</code>)</strong> para generar automáticamente las fases al crear una temporada y actualizar los goles históricos (<code>+1</code>) de los jugadores al registrar partidos e incidencias.
+          </p>
+        </div>
+
+        <!-- 5. Thunder Client -->
+        <div class="credits-tech-card">
+          <div class="tech-card-top">
+            <span class="tech-icon">⚡</span>
+            <div>
+              <h4>Thunder Client (VS Code)</h4>
+              <span class="tech-role-badge badge-cyan">Pruebas HTTP y Auditoría de Endpoints</span>
+            </div>
+          </div>
+          <p>
+            <strong>¿En qué se usó?:</strong> Herramienta clave durante el desarrollo de la API para probar manualmente cada endpoint (<code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>DELETE</code>), auditar tiempos de respuesta, validar la autenticación enviando el encabezado <code>Authorization: Bearer &lt;token&gt;</code>, comprobar validaciones de errores (<code>400</code>, <code>401</code>, <code>403</code>, <code>404</code>) y verificar la estructura de los JSON.
+          </p>
+        </div>
+
+        <!-- 6. JWT & Nodemailer 2FA -->
+        <div class="credits-tech-card">
+          <div class="tech-card-top">
+            <span class="tech-icon">🔐</span>
+            <div>
+              <h4>JWT (jsonwebtoken) &amp; Nodemailer</h4>
+              <span class="tech-role-badge badge-gold">Seguridad 2FA por Correo y Roles</span>
+            </div>
+          </div>
+          <p>
+            <strong>¿En qué se usó?:</strong> Implementación del sistema de autenticación en dos pasos (2FA) en <code>mail.service.ts</code> y <code>auth.middleware.ts</code>. Valida correo y contraseña maestra, envía un código OTP único de 6 dígitos por SMTP Gmail y firma tokens JWT distinguiendo entre el rol <code>SUPERADMIN</code> (control total) y <code>EDITOR</code> (colaborador sin permiso de vaciar la base de datos).
+          </p>
+        </div>
+
+        <!-- 7. Redis & Rate Limiting -->
+        <div class="credits-tech-card">
+          <div class="tech-card-top">
+            <span class="tech-icon">🚀</span>
+            <div>
+              <h4>Redis (ioredis) &amp; Express Rate Limit</h4>
+              <span class="tech-role-badge badge-cyan">Caché en Memoria y Protección DDoS</span>
+            </div>
+          </div>
+          <p>
+            <strong>¿En qué se usó?:</strong> En <code>cache.middleware.ts</code> se almacena en caché el resultado de los endpoints públicos para responder en milisegundos, limpiando el caché automáticamente cuando el SuperAdmin inserta o edita datos (con respaldo en RAM si Redis no está activo). En <code>rateLimit.middleware.ts</code> protege el login y la API contra ataques de fuerza bruta por IP.
+          </p>
+        </div>
+
+        <!-- 8. Swagger / OpenAPI 3.0 -->
+        <div class="credits-tech-card">
+          <div class="tech-card-top">
+            <span class="tech-icon">📖</span>
+            <div>
+              <h4>Swagger UI &amp; OpenAPI 3.0</h4>
+              <span class="tech-role-badge badge-gold">Documentación Interactiva Oficial</span>
+            </div>
+          </div>
+          <p>
+            <strong>¿En qué se usó?:</strong> Configurado en <code>src/config/swagger.ts</code> para exponer en la ruta <code>/api-docs</code> el catálogo interactivo de todos los endpoints de la API, permitiendo visualizar los esquemas de entrada/salida y ejecutar peticiones de prueba directamente desde el navegador.
+          </p>
+        </div>
+
+        <!-- 9. Multer -->
+        <div class="credits-tech-card">
+          <div class="tech-card-top">
+            <span class="tech-icon">📸</span>
+            <div>
+              <h4>Multer (Multipart Upload)</h4>
+              <span class="tech-role-badge badge-cyan">Subida de Escudos y Fotografías</span>
+            </div>
+          </div>
+          <p>
+            <strong>¿En qué se usó?:</strong> Configurado en <code>src/middlewares/upload.middleware.ts</code> para procesar archivos de imagen subidos desde la PC en <code>POST /api/v1/upload</code>, validando extensiones permitidas (PNG, JPG, WEBP, SVG) y almacenándolos de forma organizada en <code>public/uploads/clubs</code> y <code>public/uploads/players</code>.
+          </p>
+        </div>
+
+        <!-- 10. HTML5, CSS3 & JavaScript ES6+ -->
+        <div class="credits-tech-card">
+          <div class="tech-card-top">
+            <span class="tech-icon">🎨</span>
+            <div>
+              <h4>HTML5, CSS3 &amp; JavaScript (ES6+ Fetch)</h4>
+              <span class="tech-role-badge badge-gold">Frontend del SuperAdmin Dashboard</span>
+            </div>
+          </div>
+          <p>
+            <strong>¿En qué se usó?:</strong> Desarrollo de este panel interactivo en <code>public/admin/</code> (<code>index.html</code>, <code>styles.css</code>, <code>app.js</code>). Conecta en vivo con la API mediante <code>fetch()</code> asíncrono, filtra las 55 federaciones de la UEFA por región geográfica, previsualiza imágenes al instante y permite gestionar temporadas, plantillas y partidos de forma 100% visual.
+          </p>
+        </div>
+      </div>
+    </section>
+
   </main>
+
+  <!-- ==================== PIE DE PÁGINA PERMANENTE DE CRÉDITOS DE LA API ==================== -->
+  <footer class="api-credits-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <strong>🏆 UEFA Champions League Archive API v2.0 — Proyecto de Desarrollo de API RESTful</strong>
+        <span>Stack: TypeScript • Node.js • Express • PostgreSQL • Prisma ORM • JWT 2FA • Redis • Swagger • Thunder Client • Multer • HTML5/CSS3/JS</span>
+      </div>
+      <div class="footer-actions">
+        <button type="button" id="btn-open-credits-tab" class="btn btn-outline btn-sm">
+          💻 Ver Créditos y Tecnologías de la API
+        </button>
+        <a href="https://github.com/Nicomszws12/UCL-Archive-API" target="_blank" class="btn btn-outline btn-sm">
+          🐙 GitHub
+        </a>
+      </div>
+    </div>
+  </footer>
 
   <!-- ==================== MODAL RÁPIDO PARA CREAR JUGADOR DESDE PLANTILLAS ==================== -->
   <div id="quick-player-modal" class="modal-backdrop hidden">

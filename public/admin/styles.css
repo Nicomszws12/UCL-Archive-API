@@ -1060,3 +1060,211 @@ tbody tr:hover {
 .hidden {
   display: none !important;
 }
+
+/* ==================== SECCIÓN DE CRÉDITOS & STACK DE LA API ==================== */
+.credits-hero-card {
+  background: linear-gradient(135deg, #0b1b3d 0%, #152d68 60%, #091329 100%);
+  border: 1px solid rgba(0, 212, 255, 0.4);
+  border-radius: 16px;
+  padding: 28px 32px;
+  margin-bottom: 26px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.55);
+}
+
+.credits-hero-badge {
+  display: inline-block;
+  background: rgba(245, 158, 11, 0.18);
+  color: var(--accent-gold);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  margin-bottom: 12px;
+}
+
+.credits-hero-card h2 {
+  font-size: 1.55rem;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.credits-hero-desc {
+  color: #cbd5e1;
+  font-size: 0.94rem;
+  max-width: 920px;
+  line-height: 1.6;
+  margin-bottom: 22px;
+}
+
+.credits-team-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.credits-dev-pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(4, 10, 24, 0.78);
+  border: 1px solid var(--border-color);
+  padding: 10px 16px;
+  border-radius: 12px;
+}
+
+.credits-dev-pill .dev-avatar {
+  font-size: 1.6rem;
+}
+
+.credits-dev-pill strong {
+  display: block;
+  color: #fff;
+  font-size: 0.92rem;
+}
+
+.credits-dev-pill span {
+  display: block;
+  color: var(--accent-cyan);
+  font-size: 0.78rem;
+}
+
+.credits-repo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #1d4ed8 0%, #00d4ff 100%);
+  color: #030712;
+  font-weight: 700;
+  font-size: 0.86rem;
+  padding: 11px 18px;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.credits-repo-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 212, 255, 0.35);
+}
+
+.credits-section-title {
+  margin-bottom: 18px;
+}
+
+.credits-section-title h3 {
+  font-size: 1.2rem;
+  color: #fff;
+}
+
+.credits-section-title p {
+  font-size: 0.86rem;
+  color: var(--text-muted);
+}
+
+.credits-stack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 18px;
+}
+
+.credits-tech-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 20px 22px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.credits-tech-card:hover {
+  border-color: var(--accent-cyan);
+  transform: translateY(-3px);
+}
+
+.tech-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.tech-icon {
+  font-size: 1.9rem;
+  width: 46px;
+  height: 46px;
+  background: rgba(13, 27, 54, 0.9);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tech-card-top h4 {
+  color: #fff;
+  font-size: 1.02rem;
+  margin-bottom: 4px;
+}
+
+.tech-role-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+.credits-tech-card p {
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  line-height: 1.55;
+}
+
+.credits-tech-card code {
+  background: rgba(0, 212, 255, 0.12);
+  color: var(--accent-cyan);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+/* ==================== FOOTER PERMANENTE DE CRÉDITOS ==================== */
+.api-credits-footer {
+  margin-top: 40px;
+  border-top: 1px solid var(--border-color);
+  background: rgba(6, 12, 26, 0.92);
+  padding: 18px 28px;
+}
+
+.footer-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.footer-brand strong {
+  display: block;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.footer-brand span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  margin-top: 2px;
+}
+
+.footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
