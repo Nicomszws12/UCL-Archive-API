@@ -35,10 +35,10 @@ function getSuperAdminAccounts(): SuperAdminAccount[] {
     },
     {
       // 👉 CREDENCIALES Y SMTP DE TU AMIGO (SUPERADMIN 2):
-      name: process.env.SUPERADMIN_2_NAME || 'Co-Desarrollador (SuperAdmin 2)',
-      email: (process.env.SUPERADMIN_2_EMAIL || 'correo_de_tu_amigo@gmail.com').trim().toLowerCase(),
-      password: process.env.SUPERADMIN_2_PASSWORD || 'PasswordAmigo2026$*',
-      smtpUser: process.env.SMTP_2_USER || process.env.SUPERADMIN_2_EMAIL || '',
+      name: process.env.SUPERADMIN_2_NAME || 'Alejandro Rodríguez (SuperAdmin 2)',
+      email: (process.env.SUPERADMIN_2_EMAIL || 'alejandrorodriguezrubio2005@gmail.com').trim().toLowerCase(),
+      password: process.env.SUPERADMIN_2_PASSWORD || 'Alejo elrey2005@',
+      smtpUser: process.env.SMTP_2_USER || process.env.SUPERADMIN_2_EMAIL || 'alejandrorodriguezrubio2005@gmail.com',
       smtpPass: process.env.SMTP_2_PASS || ''
     }
   ];
@@ -151,26 +151,25 @@ router.post('/auth/login', authLimiter, (req: Request, res: Response) => {
   const { username, password } = req.body;
   const adminPass = process.env.ADMIN_PASSWORD || 'admin_ucl_2026';
 
-  const normalizedUser = typeof username === 'string' ? username.trim().toLowerCase() : '';
-  const isValidUser = normalizedUser === 'admin' || normalizedUser === 'colaborador' || normalizedUser === 'editor';
+  const cleanUser = typeof username === 'string' && username.trim() ? username.trim() : 'colaborador';
 
-  if (isValidUser && password === adminPass) {
+  if (password === adminPass) {
     const token = jwt.sign(
-      { username: normalizedUser || 'colaborador', role: 'EDITOR' },
+      { username: cleanUser, role: 'EDITOR' },
       JWT_SECRET,
       { expiresIn: '12h' }
     );
 
     res.json({
       message: 'Autenticación exitosa como Colaborador/Editor (Rol limitado: sin permisos destructivos)',
-      user: { username: normalizedUser || 'colaborador', role: 'EDITOR' },
+      user: { username: cleanUser, role: 'EDITOR' },
       token
     });
     return;
   }
 
   res.status(401).json({
-    error: 'Credenciales inválidas. Para acceso total SuperAdmin utiliza tu correo personal con autenticación 2FA.'
+    error: 'Contraseña de colaborador inválida (por defecto: admin_ucl_2026). Para acceso SuperAdmin utiliza tu correo personal con 2FA.'
   });
 });
 

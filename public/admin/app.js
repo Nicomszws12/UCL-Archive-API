@@ -527,12 +527,83 @@ function setupAuthHandlers() {
     container?.classList.toggle('hidden');
   });
 
-  // 7. Colaboradores: Ingresar con Token JWT pegado
+  // 7. Colaboradores: Generar Token rápido desde la pantalla de Login o Ingresar con Token JWT pegado
+  document.getElementById('btn-generate-collab-login-token')?.addEventListener('click', async () => {
+    const passInput = document.getElementById('quick-collab-pass');
+    const password = passInput?.value || '';
+    if (!password) {
+      showToast('Ingresa la clave de colaborador (por defecto: admin_ucl_2026)', 'error');
+      return;
+    }
+
+    try {
+      const res = await apiFetch('/api/v1/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ username: 'Colaborador_Universidad', password })
+      });
+      const tokenBox = document.getElementById('jwt-token-input');
+      if (tokenBox) tokenBox.value = res.token;
+      showToast('Token JWT generado y pegado automáticamente. Haz clic en Validar Token y Entrar.', 'success');
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  });
+
   document.getElementById('form-token-auth')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const input = document.getElementById('jwt-token-input');
     if (input) {
       await verifyAndUnlock(input.value, true);
+    }
+  });
+
+  // 7.1 Modal Generador de Tokens desde la Barra Superior
+  document.getElementById('btn-open-token-generator')?.addEventListener('click', () => {
+    document.getElementById('token-generator-modal')?.classList.remove('hidden');
+  });
+
+  document.getElementById('btn-close-token-generator')?.addEventListener('click', () => {
+    document.getElementById('token-generator-modal')?.classList.add('hidden');
+  });
+
+  document.getElementById('form-generate-editor-token')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const collabName = document.getElementById('gen-token-name')?.value.trim() || 'Demo_Universidad';
+    const hours = Number(document.getElementById('gen-token-hours')?.value) || 24;
+
+    try {
+      let generatedToken = '';
+      if (state.currentUser?.role === 'SUPERADMIN') {
+        const res = await apiFetch('/api/v1/auth/generate-editor-token', {
+          method: 'POST',
+          body: JSON.stringify({ collaborator_name: collabName, hours })
+        });
+        generatedToken = res.token;
+      } else {
+        const res = await apiFetch('/api/v1/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ username: collabName, password: 'admin_ucl_2026' })
+        });
+        generatedToken = res.token;
+      }
+
+      const output = document.getElementById('generated-token-output');
+      const resultBox = document.getElementById('generated-token-result-box');
+      if (output && resultBox) {
+        output.value = generatedToken;
+        resultBox.classList.remove('hidden');
+      }
+      showToast(`Token JWT generado para "${collabName}"`, 'success');
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  });
+
+  document.getElementById('btn-copy-generated-token')?.addEventListener('click', async () => {
+    const output = document.getElementById('generated-token-output');
+    if (output && output.value) {
+      await navigator.clipboard.writeText(output.value);
+      showToast('Token copiado al portapapeles. Ya puedes pegarlo en Thunder Client o en el Login.', 'success');
     }
   });
 

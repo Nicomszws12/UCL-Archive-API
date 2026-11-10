@@ -122,11 +122,20 @@
         <div id="collab-token-container" class="collab-token-container hidden">
           <div class="collab-token-box">
             <span class="auth-box-badge badge-cyan">Acceso Colaborador / Editor</span>
-            <h4>Validar Token JWT</h4>
+            <h4>Validar o Generar Token JWT</h4>
             <p class="desc-sm">
-              Si recibiste un token para carga de datos (Thunder Client o colaborador autorizado), pégalo aquí.
+              Si generaste un token en <strong>Thunder Client</strong> o <strong>Swagger UI</strong> (<code>POST /api/v1/auth/login</code>), pégalo abajo o genéralo aquí mismo con la clave de colaborador:
               <em>Nota: Tendrás permisos para registrar y editar datos, pero la opción de vaciar la base de datos estará bloqueada.</em>
             </p>
+            <div class="form-row" style="margin-bottom:10px;align-items:flex-end;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label for="quick-collab-pass" style="font-size:0.75rem;">Clave Colaborador (ej: admin_ucl_2026)</label>
+                <input type="password" id="quick-collab-pass" placeholder="Clave de colaborador" autocomplete="off" />
+              </div>
+              <button type="button" id="btn-generate-collab-login-token" class="btn btn-gold" style="height:40px;">
+                ⚡ Generar Token
+              </button>
+            </div>
             <form id="form-token-auth" autocomplete="off">
               <div class="form-group">
                 <textarea
@@ -159,6 +168,7 @@
 
     <div class="nav-actions">
       <span id="active-user-badge" class="role-pill">🔒 SUPERADMIN ACTIVO</span>
+      <button type="button" id="btn-open-token-generator" class="btn btn-outline">🔑 Generar Token</button>
       <a href="/api-docs" target="_blank" class="btn btn-outline">📖 Swagger UI</a>
       <button type="button" id="btn-refresh-all" class="btn btn-outline">🔄 Sincronizar</button>
       <button type="button" id="btn-reset-db" class="btn btn-danger-outline">🗑️ Vaciar Base de Datos</button>
@@ -988,8 +998,8 @@
           <div class="credits-dev-pill">
             <span class="dev-avatar">🛡️</span>
             <div>
-              <strong>Co-Desarrollador</strong>
-              <span>Ingeniería de Datos &amp; API Testing (SuperAdmin)</span>
+              <strong>Alejandro Rodríguez</strong>
+              <span>Co-Desarrollador • Ingeniería de Datos &amp; API Testing (SuperAdmin)</span>
             </div>
           </div>
           <a href="https://github.com/Nicomszws12/UCL-Archive-API" target="_blank" class="credits-repo-btn">
@@ -1242,6 +1252,47 @@
         </div>
         <button type="submit" class="btn btn-primary btn-full">💾 Crear y Seleccionar en Plantilla</button>
       </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL GENERADOR DE TOKENS JWT (DEMO UNIVERSIDAD / COLABORADORES) ==================== -->
+  <div id="token-generator-modal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="card-header">
+        <div>
+          <h3>🔑 Generador Oficial de Tokens JWT</h3>
+          <p>Crea tokens para Thunder Client, Swagger UI o acceso de Colaborador en la Universidad.</p>
+        </div>
+        <button type="button" id="btn-close-token-generator" class="btn btn-outline btn-sm">✖ Cerrar</button>
+      </div>
+      <form id="form-generate-editor-token">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="gen-token-name">Nombre del Colaborador / Demo <span class="req">*</span></label>
+            <input type="text" id="gen-token-name" value="Demo_Universidad" placeholder="Ej: Profesor_Universidad" required />
+          </div>
+          <div class="form-group">
+            <label for="gen-token-hours">Duración del Token (Horas)</label>
+            <select id="gen-token-hours">
+              <option value="12">12 Horas</option>
+              <option value="24" selected>24 Horas (1 Día)</option>
+              <option value="72">72 Horas (3 Días)</option>
+              <option value="168">168 Horas (7 Días)</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-gold btn-full">⚡ Generar Nuevo Token JWT (Rol EDITOR)</button>
+      </form>
+
+      <div id="generated-token-result-box" class="hidden" style="margin-top:16px;">
+        <div class="form-group">
+          <label>Token JWT Generado (Listo para copiar y pegar):</label>
+          <textarea id="generated-token-output" rows="3" readonly></textarea>
+        </div>
+        <button type="button" id="btn-copy-generated-token" class="btn btn-primary btn-full">
+          📋 Copiar Token al Portapapeles
+        </button>
+      </div>
     </div>
   </div>
 
