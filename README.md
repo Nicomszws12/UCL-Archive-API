@@ -1,67 +1,37 @@
 # 🏆 UEFA Champions League Archive API v2.0
 
-API REST Histórica y Oficial de la UEFA Champions League (1992 – Presente) construida con **Node.js, Express, TypeScript, Prisma ORM y PostgreSQL**, acompañada de un **Panel Web Interactivo de SuperAdmin (`/admin`)** y documentación interactiva con **Swagger UI (`/api-docs`)**.
+Proyecto de **Desarrollo de API RESTful Profesional**, **Panel Web Interactivo de SuperAdmin (`/admin`)**, **Aplicación Cliente Consumidora (`/app`)** y **Documentación OpenAPI 3.0 (`/api-docs`)** para el archivo histórico de la UEFA Champions League (1992 – Presente).
+
+### 👨‍💻 Equipo de Desarrollo (SuperAdmins)
+- **👑 Nicolás Nieto** — Arquitecto Backend & Full-Stack Lead (`SUPERADMIN`)
+- **🛡️ Alejandro Rodríguez** — Co-Desarrollador • Ingeniería de Datos & API Testing (`SUPERADMIN`)
 
 ---
 
-## ✨ Características Principales (v2.0)
+## 🌐 Enlaces en Producción (Cloud)
 
-- **Seguridad SuperAdmin con Doble Factor (2FA por Correo):**
-  - Soporta múltiples cuentas de **SuperAdmin** (Propietario + Co-Desarrollador) con envío de código OTP de 6 dígitos al correo electrónico.
-  - Rol secundario **Colaborador / Editor (`EDITOR`)** mediante Token JWT (permite registrar y editar datos, pero bloquea el vaciado de la base de datos).
-- **Panel Web Interactivo (`/admin`):**
-  - **1. Temporadas:** Creación automática de fases según el formato (`CLASSIC_GROUPS` de 32 equipos o `SWISS_LEAGUE` de 36 equipos).
-  - **2. Clubes UEFA:** Validación estricta de las 55 federaciones miembro de la UEFA organizadas en 5 regiones geográficas, con subida de escudos (`crest_url`).
-  - **3. Jugadores y Ranking de Goleadores:** Registro biográfico, fotos (`photo_url`) y tabla en vivo conectada a `/api/v1/players/top-scorers`.
-  - **4. Plantillas (`Squads`):** Asignador rápido y explorador dinámico por temporada y club (`STARTER`, `SUBSTITUTE`, `RESERVE`).
-  - **5. Partidos, Suspensiones e Incidencias Unificadas:** Registro atómico en transacción (`prisma.$transaction`) de partidos, estados (`FINISHED`, `SUSPENDED`, `POSTPONED`, `RESUMED_AND_FINISHED`, `CANCELLED`) y los 12 tipos de eventos oficiales de un partido.
-- **Caché con Redis (`ioredis`) + Fallback en Memoria** y **Rate Limiting (`express-rate-limit`)**.
+- **🛡️ Panel SuperAdmin:** `https://ucl-archive-api.onrender.com/admin`
+- **🌍 App Cliente Consumidora (Demo API + API Keys + JSON en Vivo):** `https://ucl-archive-api.onrender.com/app`
+- **📖 Documentación Interactiva Swagger UI:** `https://ucl-archive-api.onrender.com/api-docs`
+- **💓 Health Check / Keep-Alive:** `https://ucl-archive-api.onrender.com/api/v1/health`
 
 ---
 
-## 🚀 Instalación y Ejecución Local
+## 🛠️ Stack Tecnológico Completo (16 Tecnologías Integradas)
 
-1. **Clonar el repositorio:**
-   ```bash
-   git clone https://github.com/Nicomszws12/UCL-Archive-API.git
-   cd UCL-Archive-API
-   ```
-
-2. **Instalar dependencias:**
-   ```bash
-   npm install
-   ```
-
-3. **Configurar variables de entorno:**
-   Copia el archivo `.env.example` a `.env` y completa tus credenciales:
-   ```bash
-   cp .env.example .env
-   ```
-
-4. **Sincronizar el esquema con PostgreSQL:**
-   ```bash
-   npm run build
-   ```
-
-5. **Iniciar el servidor en modo desarrollo:**
-   ```bash
-   npm run dev
-   ```
-   - **Panel SuperAdmin:** `http://localhost:3000/admin`
-   - **Swagger UI:** `http://localhost:3000/api-docs`
-
----
-
-## 🌐 Despliegue Gratuito en la Nube (Conectado a GitHub)
-
-Dado que este proyecto incluye un servidor **Node.js + Express** y una base de datos **PostgreSQL**, GitHub Pages no puede ejecutarlo (ya que GitHub Pages solo aloja HTML estático). Sin embargo, puedes desplegarlo **100% gratis** conectando directamente este repositorio de GitHub a **Render.com** + **Neon.tech**:
-
-1. **Base de Datos PostgreSQL Gratis (Neon.tech o Render Postgres):**
-   - Crea una cuenta gratuita en [Neon.tech](https://neon.tech) o en [Render](https://render.com) y copia tu cadena de conexión `DATABASE_URL`.
-2. **Servidor Node.js Gratis en Render.com:**
-   - Entra a [Render.com](https://render.com) -> **New +** -> **Web Service**.
-   - Conecta tu repositorio `Nicomszws12/UCL-Archive-API` de GitHub.
-   - **Build Command:** `npm install && npm run build`
-   - **Start Command:** `npm start`
-   - En **Environment Variables**, pega las variables de tu `.env` (`DATABASE_URL`, `JWT_SECRET`, `SUPERADMIN_EMAIL`, `SUPERADMIN_PASSWORD`, `SUPERADMIN_2_EMAIL`, `SUPERADMIN_2_PASSWORD`, `SMTP_USER`, `SMTP_PASS`).
-   - ¡Listo! Render te dará una URL pública (`https://ucl-archive-api.onrender.com/admin`) para que tú y tu amigo entren desde cualquier lugar.
+1. **🟦 TypeScript (`TS v7 / tsx`):** Tipado estático estricto en todo el backend (`src/`), rutas, middlewares, modelos y validación en compilación (`npx tsc --noEmit`).
+2. **🟩 Node.js & Express.js (`v5`):** Servidor HTTP, arquitectura modular REST (`/api/v1`), separación de rutas públicas y administrativas, CORS y archivos estáticos.
+3. **🐘 PostgreSQL (`ucl_archive`):** Motor de base de datos relacional SQL con integridad referencial (Foreign Keys), restricciones `UNIQUE` y cascadas para las 7 entidades (`Season`, `Phase`, `Club`, `Player`, `SquadMember`, `Match`, `MatchEvent`).
+4. **💎 Prisma ORM (`@prisma/client`):** Modelado declarativo en `prisma/schema.prisma`, Enums oficiales y transacciones atómicas (`prisma.$transaction`) para crear fases automáticas y sumar goles en tiempo real.
+5. **⚡ Thunder Client (VS Code):** Pruebas HTTP y auditoría de endpoints (`GET`, `POST`, `PUT`, `DELETE`), cabeceras `Authorization: Bearer <token>` y validación de respuestas JSON.
+6. **🔐 JWT (`jsonwebtoken`) & Nodemailer (`SMTP`):** Seguridad de Doble Factor (2FA) con envío de códigos OTP de 6 dígitos al correo y control de roles (`SUPERADMIN` vs `EDITOR`).
+7. **🚀 Redis (`ioredis`) & Express Rate Limit:** Caché de alta velocidad con invalidación automática (y respaldo en memoria RAM) y límite de peticiones por IP contra fuerza bruta.
+8. **📖 Swagger UI & OpenAPI 3.0:** Portal interactivo de documentación en `/api-docs`.
+9. **📸 Multer (`Multipart Upload`):** Subida y validación de escudos de clubes (`/uploads/clubs`) y fotos de jugadores (`/uploads/players`).
+10. **🎨 HTML5, CSS3 & JavaScript ES6+ (`Fetch API`):** Interfaz interactiva del SuperAdmin Dashboard (`/admin`) con las 55 federaciones de la UEFA organizadas en 5 regiones geográficas.
+11. **🟢 Neon.tech (Serverless PostgreSQL):** Alojamiento cloud de la base de datos PostgreSQL de producción con Connection Pooling y SSL.
+12. **☁️ Render.com & GitHub CI/CD:** Despliegue continuo automático conectado a este repositorio de GitHub.
+13. **⏱️ Cron-job.org & Auto-Ping (`Keep-Alive`):** Peticiones programadas cada 10–12 minutos a `/api/v1/health` para mantener el servidor activo 24/7 sin suspensión por inactividad.
+14. **📨 Google Apps Script (`MailApp` HTTPS Webhook):** Puente Serverless por puerto 443 (`GOOGLE_SCRIPT_URL`) para despacho de correos 2FA en entornos cloud con puertos SMTP restringidos.
+15. **🌍 App Cliente Consumidora (`/app`) & Generador de `API Key` (`x-api-key`):** Portal demostrativo con generador de código para **JavaScript (`fetch`)**, **Python (`requests`)** y **cURL**, e inspector de respuestas JSON en tiempo real.
+16. **🐙 Git & GitHub (`Nicomszws12/UCL-Archive-API`):** Control de versiones distribuido y trabajo colaborativo seguro.

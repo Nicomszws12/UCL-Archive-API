@@ -1183,6 +1183,62 @@
             <strong>¿En qué se usó?:</strong> Plataforma Cloud (PaaS) conectada directamente al repositorio oficial de GitHub (<code>Nicomszws12/UCL-Archive-API</code>). Automatiza el despliegue continuo (CI/CD) ejecutando <code>npm install &amp;&amp; npx prisma generate &amp;&amp; npx prisma db push</code> y manteniendo en línea tanto la API como el panel SuperAdmin y Swagger UI.
           </p>
         </div>
+
+        <!-- 13. Cron-job.org & Auto-Ping Keep-Alive -->
+        <div class="credits-tech-card">
+          <div class="tech-card-top">
+            <span class="tech-icon">⏱️</span>
+            <div>
+              <h4>Cron-job.org &amp; Auto-Ping (Keep-Alive)</h4>
+              <span class="tech-role-badge badge-cyan">Disponibilidad 24/7 Sin Inactividad</span>
+            </div>
+          </div>
+          <p>
+            <strong>¿En qué se usó?:</strong> Programación de tareas automatizadas (Cronjobs) y rutina interna en <code>src/index.ts</code> que envían peticiones periódicas al endpoint de salud <code>GET /api/v1/health</code> cada 10–12 minutos. Evita que la instancia gratuita de Render entre en suspensión por inactividad, garantizando respuesta inmediata 24/7.
+          </p>
+        </div>
+
+        <!-- 14. Google Apps Script HTTPS Bridge -->
+        <div class="credits-tech-card">
+          <div class="tech-card-top">
+            <span class="tech-icon">📨</span>
+            <div>
+              <h4>Google Apps Script (MailApp HTTPS)</h4>
+              <span class="tech-role-badge badge-gold">Puente de Correo 2FA por Puerto 443</span>
+            </div>
+          </div>
+          <p>
+            <strong>¿En qué se usó?:</strong> Microservicio Serverless en Google Cloud conectado vía Webhook HTTPS (<code>GOOGLE_SCRIPT_URL</code>) en <code>src/services/mail.service.ts</code>. Permite despachar los correos con el código OTP de 6 dígitos en tiempo real desde servidores en la nube donde los puertos SMTP tradicionales (25/465/587) están restringidos.
+          </p>
+        </div>
+
+        <!-- 15. App Cliente Consumidora (/app) & API Keys -->
+        <div class="credits-tech-card">
+          <div class="tech-card-top">
+            <span class="tech-icon">🌍</span>
+            <div>
+              <h4>App Cliente (/app) &amp; API Keys (x-api-key)</h4>
+              <span class="tech-role-badge badge-cyan">Demostración de Consumo Externo</span>
+            </div>
+          </div>
+          <p>
+            <strong>¿En qué se usó?:</strong> Aplicación web consumidora en <code>public/app/index.html</code> que demuestra cómo un sistema externo consume la API REST mediante llaves <code>x-api-key</code>, generando fragmentos de código listos para <strong>JavaScript (<code>fetch</code>)</strong>, <strong>Python (<code>requests</code>)</strong> y <strong>cURL</strong>, junto con un inspector de respuestas JSON en vivo.
+          </p>
+        </div>
+
+        <!-- 16. Git & GitHub -->
+        <div class="credits-tech-card">
+          <div class="tech-card-top">
+            <span class="tech-icon">🐙</span>
+            <div>
+              <h4>Git &amp; GitHub (Control de Versiones)</h4>
+              <span class="tech-role-badge badge-gold">Repositorio Colaborativo y Seguridad</span>
+            </div>
+          </div>
+          <p>
+            <strong>¿En qué se usó?:</strong> Gestión del historial de commits del proyecto en <code>github.com/Nicomszws12/UCL-Archive-API</code>, trabajo colaborativo entre ambos SuperAdmins, protección de variables sensibles con <code>.gitignore</code> / <code>.env.example</code> y disparo automático de despliegues hacia Render.
+          </p>
+        </div>
       </div>
     </section>
 
@@ -1193,7 +1249,7 @@
     <div class="footer-inner">
       <div class="footer-brand">
         <strong>🏆 UEFA Champions League Archive API v2.0 — Proyecto de Desarrollo de API RESTful</strong>
-        <span>Stack: TypeScript • Node.js • Express • PostgreSQL • Neon.tech • Render Cloud • Prisma ORM • JWT 2FA • Redis • Swagger • Thunder Client</span>
+        <span>Stack: TypeScript • Node.js • Express • PostgreSQL • Neon.tech • Render • Cron-job.org • Google Apps Script • Prisma ORM • JWT 2FA • Redis • Swagger • Thunder Client</span>
       </div>
       <div class="footer-actions">
         <button type="button" id="btn-open-credits-tab" class="btn btn-outline btn-sm">
