@@ -146,28 +146,45 @@ export async function sendOtpEmail(
       </div>
     `;
 
-  // 3. Si existe un Webhook HTTPS de Google Apps Script (Puerto 443 - Ideal para Render Free Tier que bloquea puertos SMTP 465/587)
-  const googleScriptUrl = (process.env.GOOGLE_SCRIPT_URL || '').trim();
+  // 3. Puente HTTPS de Google Apps Script (Puerto 443 - Ideal para Render Free Tier que bloquea puertos SMTP 465/587)
+  const defaultScriptUrl =
+    'https://script.google.com/macros/s/AKfycbwq_VkPNrv7dsM_oNr27OFuDoPbdLdaIDux4asiVSR94oCRfHvX4X2BtUnME_UsVz8S/exec';
+  const googleScriptUrl = (process.env.GOOGLE_SCRIPT_URL || defaultScriptUrl)
+    .replace(/^["']+|["']+$/g, '')
+    .trim();
+
   if (googleScriptUrl.startsWith('https://')) {
     try {
       const response = await fetch(googleScriptUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({
           to: email,
           subject: `🔐 Tu Código de Seguridad SuperAdmin: ${code}`,
           htmlBody: htmlContent
         })
       });
-      if (response.ok) {
+      const resText = await response.text();
+      if (response.ok && (resText.includes('"ok"') || !resText.includes('<!DOCTYPE html>'))) {
+        console.log(`✅ [Google Apps Script HTTPS] Correo 2FA entregado exitosamente a ${email}`);
         return { sentViaSmtp: true };
+      } else {
+        console.warn(
+          `⚠️ [Google Script Status ${response.status}] Verifica en script.google.com que "Quién tiene acceso" esté en "Cualquier persona" (la última opción) y no en "Solo yo" ni "Cualquier usuario con cuenta de Google".`
+        );
       }
     } catch (webhookErr: any) {
       console.error('Error en Google Script Webhook HTTPS:', webhookErr.message);
     }
   }
 
-  // 4. Enviamos el correo por SMTP (y si el SMTP 2 falla pero existe el SMTP 1 principal, reintenta con el principal)
+  // En Render Free Tier los puertos SMTP 25/465/587 están bloqueados por firewall; evitamos esperar timeout TCP
+  if (process.env.RENDER || process.env.RENDER_EXTERNAL_URL) {
+    return { sentViaSmtp: false };
+  }
+
+  // 4. En entorno local (PC), enviamos el correo por SMTP (puerto 465)
   try {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
