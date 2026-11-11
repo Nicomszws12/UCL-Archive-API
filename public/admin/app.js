@@ -101,8 +101,270 @@ const UEFA_REGIONS = [
   }
 ];
 
+// ==================== 6 CONFEDERACIONES MUNDIALES PARA NACIONALIDAD DE JUGADORES ====================
+const WORLD_CONFEDERATIONS = [
+  {
+    region: 'UEFA (Unión de Asociaciones Europeas de Fútbol) — 55 miembros',
+    countries: [
+      { code: 'ALB', name: 'Albania' },
+      { code: 'GER', name: 'Alemania' },
+      { code: 'AND', name: 'Andorra' },
+      { code: 'ARM', name: 'Armenia' },
+      { code: 'AUT', name: 'Austria' },
+      { code: 'AZE', name: 'Azerbaiyán' },
+      { code: 'BEL', name: 'Bélgica' },
+      { code: 'BLR', name: 'Bielorrusia' },
+      { code: 'BIH', name: 'Bosnia y Herzegovina' },
+      { code: 'BUL', name: 'Bulgaria' },
+      { code: 'CYP', name: 'Chipre' },
+      { code: 'CRO', name: 'Croacia' },
+      { code: 'DEN', name: 'Dinamarca' },
+      { code: 'SCO', name: 'Escocia' },
+      { code: 'SVK', name: 'Eslovaquia' },
+      { code: 'SVN', name: 'Eslovenia' },
+      { code: 'ESP', name: 'España' },
+      { code: 'EST', name: 'Estonia' },
+      { code: 'FIN', name: 'Finlandia' },
+      { code: 'FRA', name: 'Francia' },
+      { code: 'WAL', name: 'Gales' },
+      { code: 'GEO', name: 'Georgia' },
+      { code: 'GIB', name: 'Gibraltar' },
+      { code: 'GRE', name: 'Grecia' },
+      { code: 'HUN', name: 'Hungría' },
+      { code: 'ENG', name: 'Inglaterra' },
+      { code: 'IRL', name: 'Irlanda (República de Irlanda)' },
+      { code: 'NIR', name: 'Irlanda del Norte' },
+      { code: 'ISL', name: 'Islandia' },
+      { code: 'FRO', name: 'Islas Feroe' },
+      { code: 'ISR', name: 'Israel' },
+      { code: 'ITA', name: 'Italia' },
+      { code: 'KAZ', name: 'Kazajistán' },
+      { code: 'KOS', name: 'Kosovo' },
+      { code: 'LVA', name: 'Letonia' },
+      { code: 'LIE', name: 'Liechtenstein' },
+      { code: 'LTU', name: 'Lituania' },
+      { code: 'LUX', name: 'Luxemburgo' },
+      { code: 'MKD', name: 'Macedonia del Norte' },
+      { code: 'MLT', name: 'Malta' },
+      { code: 'MDA', name: 'Moldavia' },
+      { code: 'MNE', name: 'Montenegro' },
+      { code: 'NOR', name: 'Noruega' },
+      { code: 'NED', name: 'Países Bajos' },
+      { code: 'POL', name: 'Polonia' },
+      { code: 'POR', name: 'Portugal' },
+      { code: 'CZE', name: 'República Checa' },
+      { code: 'ROU', name: 'Rumania' },
+      { code: 'RUS', name: 'Rusia (federación afiliada; actualmente suspendida de competiciones oficiales)' },
+      { code: 'SMR', name: 'San Marino' },
+      { code: 'SRB', name: 'Serbia' },
+      { code: 'SWE', name: 'Suecia' },
+      { code: 'SUI', name: 'Suiza' },
+      { code: 'TUR', name: 'Turquía' },
+      { code: 'UKR', name: 'Ucrania' }
+    ]
+  },
+  {
+    region: 'CONMEBOL (Confederación Sudamericana de Fútbol) — 10 miembros',
+    countries: [
+      { code: 'ARG', name: 'Argentina' },
+      { code: 'BOL', name: 'Bolivia' },
+      { code: 'BRA', name: 'Brasil' },
+      { code: 'CHI', name: 'Chile' },
+      { code: 'COL', name: 'Colombia' },
+      { code: 'ECU', name: 'Ecuador' },
+      { code: 'PAR', name: 'Paraguay' },
+      { code: 'PER', name: 'Perú' },
+      { code: 'URU', name: 'Uruguay' },
+      { code: 'VEN', name: 'Venezuela' }
+    ]
+  },
+  {
+    region: 'CAF (Confederación Africana de Fútbol) — 54 miembros FIFA + 2 asociados',
+    countries: [
+      { code: 'ANG', name: 'Angola' },
+      { code: 'ALG', name: 'Argelia' },
+      { code: 'BEN', name: 'Benín' },
+      { code: 'BOT', name: 'Botsuana' },
+      { code: 'BFA', name: 'Burkina Faso' },
+      { code: 'BDI', name: 'Burundi' },
+      { code: 'CPV', name: 'Cabo Verde' },
+      { code: 'CMR', name: 'Camerún' },
+      { code: 'CHA', name: 'Chad' },
+      { code: 'COM', name: 'Comoras' },
+      { code: 'CGO', name: 'Congo' },
+      { code: 'CIV', name: 'Costa de Marfil' },
+      { code: 'EGY', name: 'Egipto' },
+      { code: 'ERI', name: 'Eritrea' },
+      { code: 'SWZ', name: 'Esuatini (Suazilandia)' },
+      { code: 'ETH', name: 'Etiopía' },
+      { code: 'GAB', name: 'Gabón' },
+      { code: 'GAM', name: 'Gambia' },
+      { code: 'GHA', name: 'Ghana' },
+      { code: 'GUI', name: 'Guinea' },
+      { code: 'GNB', name: 'Guinea-Bisáu' },
+      { code: 'EQG', name: 'Guinea Ecuatorial' },
+      { code: 'KEN', name: 'Kenia' },
+      { code: 'LES', name: 'Lesoto' },
+      { code: 'LBR', name: 'Liberia' },
+      { code: 'LBY', name: 'Libia' },
+      { code: 'MAD', name: 'Madagascar' },
+      { code: 'MWI', name: 'Malaui' },
+      { code: 'MLI', name: 'Mali' },
+      { code: 'MAR', name: 'Marruecos' },
+      { code: 'MRI', name: 'Mauricio' },
+      { code: 'MTN', name: 'Mauritania' },
+      { code: 'MOZ', name: 'Mozambique' },
+      { code: 'NAM', name: 'Namibia' },
+      { code: 'NIG', name: 'Níger' },
+      { code: 'NGA', name: 'Nigeria' },
+      { code: 'CTA', name: 'República Centroafricana' },
+      { code: 'COD', name: 'República Democrática del Congo' },
+      { code: 'RWA', name: 'Ruanda' },
+      { code: 'STP', name: 'Santo Tomé y Príncipe' },
+      { code: 'SEN', name: 'Senegal' },
+      { code: 'SEY', name: 'Seychelles' },
+      { code: 'SLE', name: 'Sierra Leona' },
+      { code: 'SOM', name: 'Somalia' },
+      { code: 'RSA', name: 'Sudáfrica' },
+      { code: 'SDN', name: 'Sudán' },
+      { code: 'SSD', name: 'Sudán del Sur' },
+      { code: 'TAN', name: 'Tanzania' },
+      { code: 'TOG', name: 'Togo' },
+      { code: 'TUN', name: 'Túnez' },
+      { code: 'UGA', name: 'Uganda' },
+      { code: 'DJI', name: 'Yibuti' },
+      { code: 'ZAM', name: 'Zambia' },
+      { code: 'ZIM', name: 'Zimbabue' },
+      { code: 'REU', name: 'Reunión (miembro asociado CAF, no afiliado a la FIFA)' },
+      { code: 'ZAN', name: 'Zanzíbar (miembro asociado CAF, no afiliado a la FIFA)' }
+    ]
+  },
+  {
+    region: 'AFC (Confederación Asiática de Fútbol) — 47 miembros (46 FIFA + 1 miembro de confederación)',
+    countries: [
+      { code: 'AFG', name: 'Afganistán' },
+      { code: 'KSA', name: 'Arabia Saudita' },
+      { code: 'AUS', name: 'Australia' },
+      { code: 'BHR', name: 'Baréin' },
+      { code: 'BAN', name: 'Bangladés' },
+      { code: 'BRU', name: 'Brunéi' },
+      { code: 'BHU', name: 'Bután' },
+      { code: 'CAM', name: 'Camboya' },
+      { code: 'QAT', name: 'Catar' },
+      { code: 'CHN', name: 'China' },
+      { code: 'TPE', name: 'China Taipéi (Taiwán)' },
+      { code: 'PRK', name: 'Corea del Norte' },
+      { code: 'KOR', name: 'Corea del Sur' },
+      { code: 'UAE', name: 'Emiratos Árabes Unidos' },
+      { code: 'PHI', name: 'Filipinas' },
+      { code: 'GUM', name: 'Guam' },
+      { code: 'HKG', name: 'Hong Kong' },
+      { code: 'IND', name: 'India' },
+      { code: 'IDN', name: 'Indonesia' },
+      { code: 'IRQ', name: 'Irak' },
+      { code: 'IRN', name: 'Irán' },
+      { code: 'NMI', name: 'Islas Marianas del Norte (miembro pleno de AFC, no afiliado a la FIFA)' },
+      { code: 'JPN', name: 'Japón' },
+      { code: 'JOR', name: 'Jordania' },
+      { code: 'KGZ', name: 'Kirguistán' },
+      { code: 'KUW', name: 'Kuwait' },
+      { code: 'LAO', name: 'Laos' },
+      { code: 'LBN', name: 'Líbano' },
+      { code: 'MAC', name: 'Macao' },
+      { code: 'MAS', name: 'Malasia' },
+      { code: 'MDV', name: 'Maldivas' },
+      { code: 'MNG', name: 'Mongolia' },
+      { code: 'MYA', name: 'Myanmar (Birmania)' },
+      { code: 'NEP', name: 'Nepal' },
+      { code: 'OMA', name: 'Omán' },
+      { code: 'PAK', name: 'Pakistán' },
+      { code: 'PLE', name: 'Palestina' },
+      { code: 'SIN', name: 'Singapur' },
+      { code: 'SYR', name: 'Siria' },
+      { code: 'SRI', name: 'Sri Lanka' },
+      { code: 'THA', name: 'Tailandia' },
+      { code: 'TJK', name: 'Tayikistán' },
+      { code: 'TLS', name: 'Timor Oriental' },
+      { code: 'TKM', name: 'Turkmenistán' },
+      { code: 'UZB', name: 'Uzbekistán' },
+      { code: 'VIE', name: 'Vietnam' },
+      { code: 'YEM', name: 'Yemen' }
+    ]
+  },
+  {
+    region: 'CONCACAF (Norteamérica, Centroamérica y el Caribe) — 41 miembros (35 FIFA + 6 regionales)',
+    countries: [
+      { code: 'AIA', name: 'Anguila' },
+      { code: 'ATG', name: 'Antigua y Barbuda' },
+      { code: 'ARU', name: 'Aruba' },
+      { code: 'BAH', name: 'Bahamas' },
+      { code: 'BRB', name: 'Barbados' },
+      { code: 'BLZ', name: 'Belice' },
+      { code: 'BER', name: 'Bermudas' },
+      { code: 'BOE', name: 'Bonaire (miembro CONCACAF, no afiliado a la FIFA)' },
+      { code: 'CAN', name: 'Canadá' },
+      { code: 'CRC', name: 'Costa Rica' },
+      { code: 'CUB', name: 'Cuba' },
+      { code: 'CUW', name: 'Curazao' },
+      { code: 'DMA', name: 'Dominica' },
+      { code: 'SLV', name: 'El Salvador' },
+      { code: 'USA', name: 'Estados Unidos' },
+      { code: 'GRN', name: 'Granada' },
+      { code: 'GLP', name: 'Guadalupe (miembro CONCACAF, no afiliado a la FIFA)' },
+      { code: 'GUA', name: 'Guatemala' },
+      { code: 'GUF', name: 'Guayana Francesa (miembro CONCACAF, no afiliado a la FIFA)' },
+      { code: 'GUY', name: 'Guyana' },
+      { code: 'HAI', name: 'Haití' },
+      { code: 'HON', name: 'Honduras' },
+      { code: 'CAY', name: 'Islas Caimán' },
+      { code: 'TCA', name: 'Islas Turcas y Caicos' },
+      { code: 'VGB', name: 'Islas Vírgenes Británicas' },
+      { code: 'VIR', name: 'Islas Vírgenes de los Estados Unidos' },
+      { code: 'JAM', name: 'Jamaica' },
+      { code: 'MTQ', name: 'Martinica (miembro CONCACAF, no afiliado a la FIFA)' },
+      { code: 'MEX', name: 'México' },
+      { code: 'MSR', name: 'Montserrat' },
+      { code: 'NCA', name: 'Nicaragua' },
+      { code: 'PAN', name: 'Panamá' },
+      { code: 'PUR', name: 'Puerto Rico' },
+      { code: 'DOM', name: 'República Dominicana' },
+      { code: 'SKN', name: 'San Cristóbal y Nieves' },
+      { code: 'SMN', name: 'San Martín (Francia) (miembro CONCACAF, no afiliado a la FIFA)' },
+      { code: 'VIN', name: 'San Vicente y las Granadinas' },
+      { code: 'LCA', name: 'Santa Lucía' },
+      { code: 'SMA', name: 'Sint Maarten (Países Bajos) (miembro CONCACAF, no afiliado a la FIFA)' },
+      { code: 'SUR', name: 'Surinam' },
+      { code: 'TRI', name: 'Trinidad y Tobago' }
+    ]
+  },
+  {
+    region: 'OFC (Confederación de Fútbol de Oceanía) — 14 miembros (11 FIFA + 3 asociados/regionales)',
+    countries: [
+      { code: 'FIJ', name: 'Fiyi' },
+      { code: 'COK', name: 'Islas Cook' },
+      { code: 'SOL', name: 'Islas Salomón' },
+      { code: 'NCL', name: 'Nueva Caledonia' },
+      { code: 'NZL', name: 'Nueva Zelanda' },
+      { code: 'PNG', name: 'Papúa Nueva Guinea' },
+      { code: 'SAM', name: 'Samoa' },
+      { code: 'ASA', name: 'Samoa Americana' },
+      { code: 'TAH', name: 'Tahití (Polinesia Francesa)' },
+      { code: 'TGA', name: 'Tonga' },
+      { code: 'VAN', name: 'Vanuatu' },
+      { code: 'KIR', name: 'Kiribati (miembro asociado, no afiliado a la FIFA)' },
+      { code: 'TUV', name: 'Tuvalu (miembro asociado, no afiliado a la FIFA)' },
+      { code: 'NIU', name: 'Niue (antiguo miembro asociado / participante regional)' }
+    ]
+  }
+];
+
 const UEFA_COUNTRY_MAP = {};
 UEFA_REGIONS.forEach((group) => {
+  group.countries.forEach((c) => {
+    UEFA_COUNTRY_MAP[c.code] = c.name.split(' (')[0];
+  });
+});
+WORLD_CONFEDERATIONS.forEach((group) => {
   group.countries.forEach((c) => {
     UEFA_COUNTRY_MAP[c.code] = c.name.split(' (')[0];
   });
@@ -138,9 +400,11 @@ function renderUefaCountrySelect(selectId, filterQuery = '') {
 
   const previousValue = select.value;
   const q = filterQuery.trim().toLowerCase();
+  const isClubSelect = selectId === 'club-country';
+  const sourceGroups = isClubSelect ? UEFA_REGIONS : WORLD_CONFEDERATIONS;
 
   let html = '';
-  UEFA_REGIONS.forEach((group) => {
+  sourceGroups.forEach((group) => {
     const regionMatches = group.region.toLowerCase().includes(q);
     const matchingCountries = group.countries.filter(
       (c) =>
@@ -151,7 +415,8 @@ function renderUefaCountrySelect(selectId, filterQuery = '') {
     );
 
     if (matchingCountries.length > 0) {
-      html += `<optgroup label="🌍 ${escapeHtml(group.region)}">`;
+      const optLabel = isClubSelect ? `🌍 ${escapeHtml(group.region)}` : escapeHtml(group.region);
+      html += `<optgroup label="${optLabel}">`;
       matchingCountries.forEach((c) => {
         html += `<option value="${c.code}">${escapeHtml(c.name)} (${c.code})</option>`;
       });
@@ -159,7 +424,13 @@ function renderUefaCountrySelect(selectId, filterQuery = '') {
     }
   });
 
-  select.innerHTML = html || `<option value="">Sin coincidencias en la UEFA</option>`;
+  select.innerHTML =
+    html ||
+    `<option value="">${
+      isClubSelect
+        ? 'Sin coincidencias en las 55 federaciones UEFA'
+        : 'Sin coincidencias en las 6 Confederaciones Mundiales'
+    }</option>`;
 
   if (previousValue && Array.from(select.options).some((o) => o.value === previousValue)) {
     select.value = previousValue;
