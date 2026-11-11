@@ -1062,7 +1062,7 @@ function renderPlayersTable(filterText = '') {
   });
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:24px;">No hay jugadores registrados aún.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:24px;">No hay jugadores registrados aún.</td></tr>`;
     return;
   }
 
@@ -1089,6 +1089,12 @@ function renderPlayersTable(filterText = '') {
           <span class="tag ${p.active ? 'tag-active' : 'tag-retired'}">
             ${p.active ? '🟢 Activo' : '⚪ Retirado'}
           </span>
+        </td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            <button type="button" class="btn btn-sm" style="padding:4px 8px;font-size:0.75rem;" onclick="window.selectPlayerForEdit(${p.id})" title="Seleccionar para editar">✏️</button>
+            <button type="button" class="btn btn-sm btn-danger" style="padding:4px 8px;font-size:0.75rem;background:rgba(239,68,68,0.18);border:1px solid rgba(239,68,68,0.45);color:#fca5a5;" onclick="window.deletePlayerById(${p.id})" title="Eliminar jugador">🗑️</button>
+          </div>
         </td>
       </tr>
     `;
@@ -1902,12 +1908,50 @@ function syncEditPlayerFields() {
   const player = state.players.find((p) => String(p.id) === String(select.value));
   if (!player) return;
 
+  renderUefaCountrySelect('edit-player-nationality');
+  const natSelect = document.getElementById('edit-player-nationality');
+  if (natSelect && player.nationality) {
+    natSelect.value = player.nationality;
+  }
+
+  const posSelect = document.getElementById('edit-player-position');
+  if (posSelect && player.position) {
+    posSelect.value = player.position;
+  }
+
   document.getElementById('edit-player-goals').value = player.total_goals;
   document.getElementById('edit-player-apps').value = player.total_appearances;
   document.getElementById('edit-player-active').value = String(player.active);
   document.getElementById('edit-player-photo-url').value = player.photo_url || '';
   document.getElementById('edit-player-photo-preview').src = player.photo_url || DEFAULT_PLAYER_SVG;
 }
+
+window.selectPlayerForEdit = function (playerId) {
+  const select = document.getElementById('edit-player-select');
+  if (!select) return;
+  select.value = String(playerId);
+  syncEditPlayerFields();
+  select.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  showToast('Jugador cargado en el formulario de edición', 'success');
+};
+
+window.deletePlayerById = async function (playerId) {
+  const player = state.players.find((p) => Number(p.id) === Number(playerId));
+  const fullName = player ? `${player.first_name} ${player.last_name}` : `ID #${playerId}`;
+  if (!window.confirm(`¿Estás seguro de eliminar al jugador "${fullName}" de la base de datos?`)) {
+    return;
+  }
+
+  try {
+    const res = await apiFetch(`/api/v1/players/${playerId}`, {
+      method: 'DELETE'
+    });
+    showToast(res.message || `Jugador "${fullName}" eliminado`, 'success');
+    await loadAllData();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+};
 
 function syncEditSeasonFields() {
   const select = document.getElementById('edit-season-select');
@@ -2010,8 +2054,16 @@ function setupFormSubmissions() {
     }
   });
 
-  // 2.1 Actualizar Jugador Existente
+  // 2.1 Actualizar o Eliminar Jugador Existente
   document.getElementById('edit-player-select')?.addEventListener('change', syncEditPlayerFields);
+  document.getElementById('btn-delete-player')?.addEventListener('click', async () => {
+    const playerId = document.getElementById('edit-player-select')?.value;
+    if (!playerId) {
+      showToast('Selecciona primero un jugador para eliminar', 'error');
+      return;
+    }
+    await window.deletePlayerById(Number(playerId));
+  });
   document.getElementById('form-update-player')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const playerId = document.getElementById('edit-player-select').value;
@@ -2019,6 +2071,8 @@ function setupFormSubmissions() {
 
     try {
       const payload = {
+        nationality: document.getElementById('edit-player-nationality').value.trim().toUpperCase(),
+        position: document.getElementById('edit-player-position').value,
         total_goals: Number(document.getElementById('edit-player-goals').value),
         total_appearances: Number(document.getElementById('edit-player-apps').value),
         active: document.getElementById('edit-player-active').value === 'true',
@@ -2257,6 +2311,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   renderUefaCountrySelect('club-country');
   renderUefaCountrySelect('player-nationality');
+  renderUefaCountrySelect('edit-player-nationality');
   renderUefaCountrySelect('modal-player-nat');
 
   setupTabs();

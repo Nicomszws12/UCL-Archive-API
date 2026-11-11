@@ -423,12 +423,12 @@
             </form>
           </div>
 
-          <!-- Editar Jugador Existente -->
+          <!-- Editar o Eliminar Jugador Existente -->
           <div class="card">
             <div class="card-header">
               <div>
-                <h3>✏️ Actualizar Foto o Estadísticas de Jugador</h3>
-                <p>Selecciona un jugador para modificar su foto, goles, partidos o estado.</p>
+                <h3>✏️ Actualizar o Eliminar Jugador</h3>
+                <p>Selecciona un jugador para cambiar su nacionalidad, posición, foto, estadísticas o eliminarlo.</p>
               </div>
             </div>
             <form id="form-update-player">
@@ -436,6 +436,29 @@
                 <label for="edit-player-select">Seleccionar Jugador <span class="req">*</span></label>
                 <input type="text" class="select-filter-input" data-target="edit-player-select" placeholder="🔍 Escribe para buscar jugador..." />
                 <select id="edit-player-select" required></select>
+              </div>
+              <div class="form-group">
+                <label for="edit-player-nationality">Nacionalidad / Confederación Mundial</label>
+                <input type="text" class="uefa-country-filter select-filter-input" data-target="edit-player-nationality" placeholder="🔍 Buscar país o confederación (ej: Brasil, Argentina, Colombia)..." />
+                <select id="edit-player-nationality" required></select>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="edit-player-position">Posición</label>
+                  <select id="edit-player-position" required>
+                    <option value="Forward">Forward (Delantero)</option>
+                    <option value="Midfielder">Midfielder (Mediocampista)</option>
+                    <option value="Defender">Defender (Defensa)</option>
+                    <option value="Goalkeeper">Goalkeeper (Portero)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="edit-player-active">Estado</label>
+                  <select id="edit-player-active">
+                    <option value="true">🟢 En Activo</option>
+                    <option value="false">⚪ Retirado / Leyenda</option>
+                  </select>
+                </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
@@ -446,13 +469,6 @@
                   <label for="edit-player-apps">Partidos Totales</label>
                   <input type="number" id="edit-player-apps" min="0" required />
                 </div>
-              </div>
-              <div class="form-group">
-                <label for="edit-player-active">Estado</label>
-                <select id="edit-player-active">
-                  <option value="true">🟢 En Activo</option>
-                  <option value="false">⚪ Retirado / Leyenda</option>
-                </select>
               </div>
               <div class="image-uploader-box">
                 <label>📸 Actualizar Foto del Jugador (Archivo o URL)</label>
@@ -467,7 +483,10 @@
                   <small style="color:#94a3b8;">Foto circular actual / nueva.</small>
                 </div>
               </div>
-              <button type="submit" class="btn btn-gold btn-full">🔄 Actualizar Jugador</button>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
+                <button type="submit" class="btn btn-gold" style="flex:2;">🔄 Actualizar Jugador</button>
+                <button type="button" id="btn-delete-player" class="btn btn-danger" style="flex:1;background:rgba(239,68,68,0.18);border:1px solid rgba(239,68,68,0.5);color:#fca5a5;">🗑️ Eliminar Jugador</button>
+              </div>
             </form>
           </div>
         </div>
@@ -494,11 +513,12 @@
                   <tr>
                     <th>#</th>
                     <th>Foto / Jugador</th>
-                    <th>País UEFA</th>
+                    <th>País</th>
                     <th>Posición</th>
                     <th>Goles ⚽</th>
                     <th>Partidos</th>
                     <th>Estado</th>
+                    <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody id="tbody-players"></tbody>

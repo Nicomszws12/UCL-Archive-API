@@ -467,6 +467,38 @@ router.put('/players/:id', requireAdminJWT, async (req: Request, res: Response) 
 });
 
 /**
+ * 2.2 DELETE /api/v1/players/:id (Protegido con JWT)
+ * Elimina un jugador de la base de datos (y limpia en cascada sus vínculos en plantillas o eventos)
+ */
+router.delete('/players/:id', requireAdminJWT, async (req: Request, res: Response) => {
+  try {
+    const playerId = Number(req.params.id);
+    if (!playerId || Number.isNaN(playerId)) {
+      res.status(400).json({ error: 'ID de jugador inválido' });
+      return;
+    }
+
+    const existingPlayer = await prisma.player.findUnique({ where: { id: playerId } });
+    if (!existingPlayer) {
+      res.status(404).json({ error: 'Jugador no encontrado' });
+      return;
+    }
+
+    await prisma.player.delete({
+      where: { id: playerId }
+    });
+
+    await clearCache();
+
+    res.json({
+      message: `Jugador "${existingPlayer.first_name} ${existingPlayer.last_name}" eliminado correctamente`
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al eliminar el jugador' });
+  }
+});
+
+/**
  * 3. POST /api/v1/seasons (Protegido con JWT)
  * Crea una temporada desde cero y genera automáticamente todas sus fases en transacción
  */
