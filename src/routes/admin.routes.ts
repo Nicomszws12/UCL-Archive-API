@@ -368,6 +368,38 @@ router.put('/clubs/:id', requireAdminJWT, async (req: Request, res: Response) =>
 });
 
 /**
+ * 1.2 DELETE /api/v1/clubs/:id (Protegido con JWT)
+ * Elimina un club de la base de datos (y limpia en cascada sus vínculos en plantillas o partidos)
+ */
+router.delete('/clubs/:id', requireAdminJWT, async (req: Request, res: Response) => {
+  try {
+    const clubId = Number(req.params.id);
+    if (!clubId || Number.isNaN(clubId)) {
+      res.status(400).json({ error: 'ID de club inválido' });
+      return;
+    }
+
+    const existingClub = await prisma.club.findUnique({ where: { id: clubId } });
+    if (!existingClub) {
+      res.status(404).json({ error: 'Club no encontrado' });
+      return;
+    }
+
+    await prisma.club.delete({
+      where: { id: clubId }
+    });
+
+    await clearCache();
+
+    res.json({
+      message: `Club "${existingClub.name}" eliminado correctamente`
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al eliminar el club' });
+  }
+});
+
+/**
  * 2. POST /api/v1/players (Protegido con JWT)
  * Crea un jugador nuevo con photo_url (archivo subido o URL)
  */

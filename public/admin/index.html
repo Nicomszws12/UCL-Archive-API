@@ -280,12 +280,12 @@
             </form>
           </div>
 
-          <!-- Editar Club Existente -->
+          <!-- Editar o Eliminar Club Existente -->
           <div class="card">
             <div class="card-header">
               <div>
-                <h3>✏️ Editar Escudo o Datos de Club</h3>
-                <p>Selecciona un club registrado para actualizar su escudo, estadio o títulos.</p>
+                <h3>✏️ Actualizar o Eliminar Club</h3>
+                <p>Selecciona un club registrado para modificar su nombre, país UEFA, escudo, estadio, títulos o eliminarlo.</p>
               </div>
             </div>
             <form id="form-update-club">
@@ -293,6 +293,21 @@
                 <label for="edit-club-select">Seleccionar Club <span class="req">*</span></label>
                 <input type="text" class="select-filter-input" data-target="edit-club-select" placeholder="🔍 Buscar club..." />
                 <select id="edit-club-select" required></select>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="edit-club-name">Nombre Oficial</label>
+                  <input type="text" id="edit-club-name" required />
+                </div>
+                <div class="form-group">
+                  <label for="edit-club-short">Abreviatura (3-5 letras)</label>
+                  <input type="text" id="edit-club-short" maxlength="5" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="edit-club-country">País Federación UEFA</label>
+                <input type="text" class="uefa-country-filter select-filter-input" data-target="edit-club-country" placeholder="🔍 Buscar país o región de la UEFA..." />
+                <select id="edit-club-country" required></select>
               </div>
               <div class="form-row">
                 <div class="form-group">
@@ -317,7 +332,10 @@
                   <small style="color:#94a3b8;">Escudo actual / nuevo del club.</small>
                 </div>
               </div>
-              <button type="submit" class="btn btn-gold btn-full">🔄 Actualizar Club</button>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
+                <button type="submit" class="btn btn-gold" style="flex:2;">🔄 Actualizar Club</button>
+                <button type="button" id="btn-delete-club" class="btn btn-danger" style="flex:1;background:rgba(239,68,68,0.18);border:1px solid rgba(239,68,68,0.5);color:#fca5a5;">🗑️ Eliminar Club</button>
+              </div>
             </form>
           </div>
         </div>
@@ -338,6 +356,7 @@
                   <th>País UEFA</th>
                   <th>Estadio</th>
                   <th>Títulos 🏆</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody id="tbody-clubs"></tbody>

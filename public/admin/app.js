@@ -400,7 +400,7 @@ function renderUefaCountrySelect(selectId, filterQuery = '') {
 
   const previousValue = select.value;
   const q = filterQuery.trim().toLowerCase();
-  const isClubSelect = selectId === 'club-country';
+  const isClubSelect = selectId === 'club-country' || selectId === 'edit-club-country';
   const sourceGroups = isClubSelect ? UEFA_REGIONS : WORLD_CONFEDERATIONS;
 
   let html = '';
@@ -1016,7 +1016,7 @@ function renderClubsTable(filterText = '') {
   });
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:24px;">No hay clubes registrados aún. ¡Crea el primero en el formulario!</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:24px;">No hay clubes registrados aún. ¡Crea el primero en el formulario!</td></tr>`;
     return;
   }
 
@@ -1038,6 +1038,12 @@ function renderClubsTable(filterText = '') {
         <td><span class="tag tag-swiss">${escapeHtml(countryLabel)}</span></td>
         <td>${escapeHtml(c.stadium)}</td>
         <td><strong>${c.titles_count}</strong> 🏆</td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            <button type="button" class="btn btn-sm" style="padding:4px 8px;font-size:0.75rem;" onclick="window.selectClubForEdit(${c.id})" title="Seleccionar para editar">✏️</button>
+            <button type="button" class="btn btn-sm btn-danger" style="padding:4px 8px;font-size:0.75rem;background:rgba(239,68,68,0.18);border:1px solid rgba(239,68,68,0.45);color:#fca5a5;" onclick="window.deleteClubById(${c.id})" title="Eliminar club">🗑️</button>
+          </div>
+        </td>
       </tr>
     `;
     })
@@ -1895,11 +1901,50 @@ function syncEditClubFields() {
   const club = state.clubs.find((c) => String(c.id) === String(select.value));
   if (!club) return;
 
+  const nameInput = document.getElementById('edit-club-name');
+  if (nameInput) nameInput.value = club.name || '';
+
+  const shortInput = document.getElementById('edit-club-short');
+  if (shortInput) shortInput.value = club.short_name || '';
+
+  renderUefaCountrySelect('edit-club-country');
+  const countrySelect = document.getElementById('edit-club-country');
+  if (countrySelect && club.country_code) {
+    countrySelect.value = club.country_code;
+  }
+
   document.getElementById('edit-club-stadium').value = club.stadium || '';
   document.getElementById('edit-club-titles').value = club.titles_count ?? 0;
   document.getElementById('edit-club-crest-url').value = club.crest_url || '';
   document.getElementById('edit-club-crest-preview').src = club.crest_url || DEFAULT_CREST_SVG;
 }
+
+window.selectClubForEdit = function (clubId) {
+  const select = document.getElementById('edit-club-select');
+  if (!select) return;
+  select.value = String(clubId);
+  syncEditClubFields();
+  select.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  showToast('Club cargado en el formulario de edición', 'success');
+};
+
+window.deleteClubById = async function (clubId) {
+  const club = state.clubs.find((c) => Number(c.id) === Number(clubId));
+  const clubName = club ? club.name : `ID #${clubId}`;
+  if (!window.confirm(`¿Estás seguro de eliminar al club "${clubName}" de la base de datos?`)) {
+    return;
+  }
+
+  try {
+    const res = await apiFetch(`/api/v1/clubs/${clubId}`, {
+      method: 'DELETE'
+    });
+    showToast(res.message || `Club "${clubName}" eliminado`, 'success');
+    await loadAllData();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+};
 
 function syncEditPlayerFields() {
   const select = document.getElementById('edit-player-select');
@@ -1996,8 +2041,16 @@ function setupFormSubmissions() {
     }
   });
 
-  // 1.1 Actualizar Club Existente
+  // 1.1 Actualizar o Eliminar Club Existente
   document.getElementById('edit-club-select')?.addEventListener('change', syncEditClubFields);
+  document.getElementById('btn-delete-club')?.addEventListener('click', async () => {
+    const clubId = document.getElementById('edit-club-select')?.value;
+    if (!clubId) {
+      showToast('Selecciona primero un club para eliminar', 'error');
+      return;
+    }
+    await window.deleteClubById(Number(clubId));
+  });
   document.getElementById('form-update-club')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const clubId = document.getElementById('edit-club-select').value;
@@ -2005,6 +2058,9 @@ function setupFormSubmissions() {
 
     try {
       const payload = {
+        name: document.getElementById('edit-club-name').value.trim(),
+        short_name: document.getElementById('edit-club-short').value.trim().toUpperCase(),
+        country_code: document.getElementById('edit-club-country').value.trim().toUpperCase(),
         stadium: document.getElementById('edit-club-stadium').value.trim(),
         titles_count: Number(document.getElementById('edit-club-titles').value) || 0,
         crest_url: document.getElementById('edit-club-crest-url').value.trim() || null
@@ -2310,6 +2366,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   renderUefaCountrySelect('club-country');
+  renderUefaCountrySelect('edit-club-country');
   renderUefaCountrySelect('player-nationality');
   renderUefaCountrySelect('edit-player-nationality');
   renderUefaCountrySelect('modal-player-nat');
